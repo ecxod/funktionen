@@ -2,8 +2,12 @@
     "name": "ecxod/funktionen",
     "description": "Langweilige Funktionen die man immer braucht",
     "type": "library",
+    "keywords": ["ecxod", "functions", "funktionen"],
     "license": "MIT",
     "autoload": {
+        "files": [
+            "src/funktionen/F.php"
+        ],
         "psr-4": {
             "Ecxod\\Funtionen\\": "src/funktionen/"
         }
@@ -16,5 +20,9 @@
     ],
     "minimum-stability": "stable",
     "require": {
-    }
+        "php": "^7.2|^7.4|^8.0|^8.2",
+    },
+    "Suggests": {
+        "php": ">=7.2"
+    },
 }
