@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace F {
+namespace \Ecxod\Funktionen {
 
     /** Function is checking if a library is loaded.
      * If there is no composer.lock file, it will return false.
