@@ -1,1 +1,20 @@
-
+{
+    "name": "ecxod/funktionen",
+    "description": "Langweilige Funktionen die man immer braucht",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Ecxod\\Funtionen\\": "src/funktionen/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Christian Eichert",
+            "email": "c@zp1.net"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+    }
+}
