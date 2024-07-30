@@ -4,6 +4,25 @@ declare(strict_types=1);
 
 namespace Ecxod\Funktionen;
 
+function isMe(): bool
+{
+    $myIp = "";
+    if (empty($myIp)) $myIp = strval(value: $_ENV['MYIP']);
+    if (empty($myIp)) $myIp = strval(value: getenv(name: 'MYIP'));
+    if (empty($myIp)) {
+        die("ERROR: " . __METHOD__);
+    } else if (
+        !empty($myIp) and
+        isset($_SERVER['REMOTE_ADDR']) and !empty($_SERVER['REMOTE_ADDR']) and
+        \in_array(needle: $_SERVER['REMOTE_ADDR'], haystack: explode(separator: ",", string: $myIp))
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
 /** Function is checking if a library is loaded.
  * If there is no composer.lock file, it will return false.
  * 
