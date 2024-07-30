@@ -95,3 +95,83 @@ function libraryLoaded(string $library, string $document_root = null): bool
     }
 }
 
+
+
+/** to.do.
+ * sollte in ::A gesteuert werden
+ * und soll wenn möglich keine Session sein.
+ * 
+ * @return void
+ */
+function userAgent(): void
+{
+    // Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0
+    // Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0
+    // Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0
+    // Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62
+    // Opera/9.80 (Macintosh; Intel Mac OS X; U; en) Presto/2.2.15 Version/10.00
+    // Opera/9.60 (Windows NT 6.0; U; en) Presto/2.1.1
+    // Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Mobile/15E148 Safari/604.1
+    // Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0)
+
+    if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+
+        $userAgent = preg_split("/[\(\)]/", $_SERVER['HTTP_USER_AGENT'], 3);
+        // Wenn alles mit Mozilla beginnt.
+        $el = array(); // oder besser unset ? to.do.
+
+        foreach ($userAgent as $key => $val) {
+
+            $varr = explode("/", preg_replace('/\((.*)\)/', '', trim($val)));
+            $parr = explode(";", preg_replace('/\((.*)\)/', '', trim($val)));
+            $barr = explode(" ", preg_replace('/\((.*)\)/', '', trim($val)));
+
+            $el[$key] = array();
+
+            if ($key === 0) {
+                $el[$key]['generic'] = $varr[0];
+                $el[$key]['htmlver'] = (isset($varr[1]) ? $varr[1] : null);
+            }
+
+            if ($key === 1) {
+                foreach ($parr as $k => $v) {
+                    if ($k == 0)
+                        $el[$key]['platform'] = str_replace(['(', ')'], '', trim($parr[$k]));
+                    if ($k == 1)
+                        $el[$key]['version'] = str_replace(['(', ')'], '', trim($parr[$k]));
+                    if ($k >= 2)
+                        $el[$key]['val' . $k] = str_replace(['(', ')'], '', trim($parr[$k]));
+                }
+            }
+
+            if ($key === 2) {
+                $n = 0;
+                $bl = array();
+                foreach ($barr as $i => $j) {
+                    $jj = explode("/", preg_replace('/\((.*)\)/', '', trim($j)));
+                    if (!empty(trim($jj[0]))) {
+                        $el[$key + $n]['product'] = $jj[0];
+                        $bl[$n] = $jj[0];
+                        $el[$key + $n]['version'] = !empty($jj[1]) ? $jj[1] : null;
+                        $n++;
+                    }
+                }
+            }
+        }
+        unset($_SESSION['useragent']);
+        $_SESSION['useragent'] = array();
+        $_SESSION['useragent'] = $el;
+        $_SESSION['useragent']['1']['browserlist'] = isset($bl) ? implode(',', $bl) : '';
+        //F::logg($_SESSION['useragent'],__METHOD__,__LINE__);
+        return;
+    } else {
+
+        if (!empty($_SESSION['useragent'])) {
+            //F::logg("\$_SESSION['useragent']=" . $_SESSION['useragent'], __METHOD__, __LINE__);
+            $_SESSION['useragent'] = "";
+        } else {
+            $_SESSION['useragent'] = "";
+        }
+        return;
+    }
+}
