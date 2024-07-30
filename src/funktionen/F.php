@@ -4,6 +4,37 @@ declare(strict_types=1);
 
 namespace Ecxod\Funktionen;
 
+/** Fügt (nur mir!) HTML Kommentare in den code ein.
+ * Idealerweise ist Argument 1 die Methode. Das erscheint dann als KLASE::METHODE
+ * @param string $m  
+ * @return string 
+ */
+function m(string $m): string
+{
+    return isMe() ? PHP_EOL . '<!--' . strval($m) . '-->' . PHP_EOL : '';
+}
+
+/**
+ * isMobile detects mobile devices
+ * 
+ * @return bool
+ */
+function isMobile(): bool
+{
+    if (isset($_SERVER["HTTP_USER_AGENT"])) {
+        // preg_match(pattern, subject)
+        return boolval(preg_match("/(" . mob_str() . ")/i", $_SERVER["HTTP_USER_AGENT"]));
+    } else {
+        return false;
+    }
+}
+
+const mobile_geraete = array("android", "avantgo", "blackberry", "bolt", "boost", "cricket", "docomo", "fone", "hiptop", "mini", "mobi", "palm", "phone", "pie", "tablet", "up\.browser", "up\.link", "webos", "wos", "iphone", "ipad");
+function mob_str()
+{
+    return implode("|", mobile_geraete);
+}
+
 function isMe(): bool
 {
     $myIp = "";
