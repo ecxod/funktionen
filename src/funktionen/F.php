@@ -222,7 +222,7 @@ function dotEnv(string $envfile='.env'): void
 {
     $envpath = realpath($_SERVER['DOCUMENT_ROOT'] . '/../');
     if ($envpath) {
-        $dotenv = Dotenv::createImmutable($envpath, $envfile);
+        $dotenv = \Dotenv\Dotenv::createImmutable($envpath, $envfile);
         $dotenv->load();
         $dotenv->required('CHARSET')->notEmpty();
         $dotenv->required('CHARSET')->allowedValues(['ISO-8859-1', 'ISO-8859-2', 'UTF8', 'UTF-8']);
