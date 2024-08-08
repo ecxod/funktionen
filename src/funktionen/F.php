@@ -192,6 +192,32 @@ function sayonara(): void
     }
 }
 
+/** 
+ * Hauptaufgabe den Cookie[la] setzen
+ * Nebenaufgaben : die Session 'locale_canonicalize', 'locale_display_language' und 'locale_display_region' zu setzen
+ * Wenn er keine HTTP_ACCEPT_LANGUAGE bekommt, setzte er alles auf englisch.
+ * 
+ * @return void
+ */
+function languageManagement(): void
+{
+
+    if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        $locale_from_http = "en_US";
+    } else {
+        $locale_from_http = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        $_SESSION['locale_canonicalize'] = strval(\Locale::canonicalize($locale_from_http));
+        $_SESSION['locale_display_language'] = strval(locale_get_display_language(
+            $locale_from_http,
+            isset($_COOKIE['la']) ? $_COOKIE['la'] : 'en'
+        ));
+        $_SESSION['locale_display_region'] = strval(locale_get_display_region(
+            $locale_from_http,
+            isset($_COOKIE['la']) ? $_COOKIE['la'] : 'en'
+        ));
+    }
+}
+
 function dotEnv(string $envfile='.env'): void
 {
     $envpath = realpath($_SERVER['DOCUMENT_ROOT'] . '/../');
