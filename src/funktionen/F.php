@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 namespace Ecxod\Funktionen;
 
+public static function c(string $string): string
+{
+    //return preg_replace('/[^A-Za-z0-9\-_\.\;\& ]/', '', $string);
+    $Parsedown = new \Parsedown();
+    $string = htmlspecialchars($string, $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, $encoding = 'UTF-8', $double_encode = false);
+    $string = $Parsedown->line($string);
+    return $string;
+}
+
 /** Fügt (nur mir!) HTML Kommentare in den code ein.
  * Idealerweise ist Argument 1 die Methode. Das erscheint dann als KLASE::METHODE
  * @param string $m  
