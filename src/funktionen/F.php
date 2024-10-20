@@ -13,6 +13,38 @@ function c(string $string): string
     return $string;
 }
 
+function logg($t, string $m = NULL, string $l = NULL)
+{
+    if (!empty($m) and file_exists(strval($m))) {
+        $m = basename(strval($m));
+    }
+    if (gettype($t) === 'array') {
+        if (isset($_ENV['ERRORLOG'])) {
+            error_log_array($t, $m, $l);
+            write_mail($t, $m, $l);
+        }
+        return TRUE;
+    } elseif (gettype($t) === 'string') {
+        if ($_ENV['ERRORLOG']) {
+            error_log(($t ? $t : 'ERROR') . ($m ? " in " . $m : "") . ($l ? " #" . $l : ""));
+            write_mail($t, $m, $t);
+        }
+        return TRUE;
+    } else {
+        return TRUE;
+    }
+}
+function write_mail($text = NULL, $method = NULL, $line = NULL)
+{
+    // TODO:. die methode muss noch geschrieben werden :)))
+    return;
+}
+function error_log_array($arr, $m = NULL, $l = NULL)
+{
+    logg("array(" . json_encode($arr) . ")", $m, $l);
+    return;
+}
+
 /** Fügt (nur mir!) HTML Kommentare in den code ein.
  * Idealerweise ist Argument 1 die Methode. Das erscheint dann als KLASE::METHODE
  * @param string $m  
