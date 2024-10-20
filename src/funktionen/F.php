@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ecxod\Funktionen;
 
-public static function c(string $string): string
+function c(string $string): string
 {
     //return preg_replace('/[^A-Za-z0-9\-_\.\;\& ]/', '', $string);
     $Parsedown = new \Parsedown();
