@@ -13,7 +13,7 @@ function c(string $string): string
     return $string;
 }
 
-function logg($t, string $m = NULL, string $l = NULL)
+function logg(string $t, string $m = NULL, int $l = NULL)
 {
     if (!empty($m) and file_exists(strval($m))) {
         $m = basename(strval($m));
@@ -26,7 +26,10 @@ function logg($t, string $m = NULL, string $l = NULL)
         return TRUE;
     } elseif (gettype($t) === 'string') {
         if ($_ENV['ERRORLOG']) {
-            error_log(($t ? $t : 'ERROR') . ($m ? " in " . $m : "") . ($l ? " #" . $l : ""));
+            error_log(
+                (strval($t) ? strval($t) : 'ERROR') . 
+                (strval($m) ? " in " . strval($m) : "") . 
+                (strval($l) ? " #" . strval($l) : ""));
             write_mail($t, $m, $t);
         }
         return TRUE;
@@ -34,12 +37,14 @@ function logg($t, string $m = NULL, string $l = NULL)
         return TRUE;
     }
 }
-function write_mail($text = NULL, $method = NULL, $line = NULL)
+
+function write_mail(string $t = NULL, string $m = NULL, int $l = NULL)
 {
     // TODO:. die methode muss noch geschrieben werden :)))
     return;
 }
-function error_log_array($arr, $m = NULL, $l = NULL)
+
+function error_log_array(array $arr, string $m = NULL, int $l = NULL)
 {
     logg("array(" . json_encode($arr) . ")", $m, $l);
     return;
