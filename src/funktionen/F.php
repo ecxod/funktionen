@@ -340,14 +340,23 @@ function languageManagement(): void
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
+function dotEnv(string $envfile = '.env'): void
 {
-    $envpath = realpath($_SERVER['DOCUMENT_ROOT'] . '/../');
-    if ($envpath) {
-        $dotenv = \Dotenv\Dotenv::createImmutable($envpath, $envfile);
-        $dotenv->load();
-        $dotenv->required('CHARSET')->notEmpty();
-        $dotenv->required('CHARSET')->allowedValues(['ISO-8859-1', 'ISO-8859-2', 'UTF8', 'UTF-8']);
-        $dotenv->required('LOCALEDIR')->notEmpty();
-        $dotenv->required('DSNMAPPING')->notEmpty();
+    if (class_exists('Dotenv\Dotenv')) {
+        $envpath = realpath($_SERVER['DOCUMENT_ROOT'] . '/../');
+        if ($envpath) {
+            $dotenv = \Dotenv\Dotenv::createImmutable($envpath, $envfile);
+            $dotenv->load();
+            $dotenv->required('CHARSET')->notEmpty();
+            $dotenv->required('CHARSET')->allowedValues(['ISO-8859-1', 'ISO-8859-2', 'UTF8', 'UTF-8']);
+            $dotenv->required('LOCALEDIR')->notEmpty();
+            $dotenv->required('DSNMAPPING')->notEmpty();
+        }
+    } else {
+        if (function_exists('Sentry\captureMessage')) {
+            \Sentry\captureMessage("Class Dotenv\Dotenv is not loaded");
+        } else {
+            logg("### Class Dotenv\Dotenv is not loaded");
+        }
     }
 }
