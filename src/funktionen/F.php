@@ -116,7 +116,7 @@ function isMobile(): bool
     }
 }
 
-const mobile_geraete = array("android", "avantgo", "blackberry", "bolt", "boost", "cricket", "docomo", "fone", "hiptop", "mini", "mobi", "palm", "phone", "pie", "tablet", "up\.browser", "up\.link", "webos", "wos", "iphone", "ipad");
+const mobile_geraete = ["android", "avantgo", "blackberry", "bolt", "boost", "cricket", "docomo", "fone", "hiptop", "mini", "mobi", "palm", "phone", "pie", "tablet", "up\.browser", "up\.link", "webos", "wos", "iphone", "ipad"];
 function mob_str()
 {
     return implode("|", mobile_geraete);
