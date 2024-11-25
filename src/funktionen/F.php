@@ -27,6 +27,7 @@ function c(string $string): string
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
+function logg(string|array $t, string $m = NULL, int $l = NULL): bool
 {
     if (!empty($m) and file_exists(strval($m))) {
         $m = basename(strval($m));
@@ -40,10 +41,11 @@ function c(string $string): string
     } elseif (gettype($t) === 'string') {
         if ($_ENV['ERRORLOG']) {
             error_log(
-                (strval($t) ? strval($t) : 'ERROR') . 
-                (strval($m) ? " in " . strval($m) : "") . 
-                (strval($l) ? " #" . strval($l) : ""));
-            write_mail($t, $m, $t);
+                (strval($t) ? strval($t) : 'ERROR') .
+                    (strval($m) ? " in " . strval($m) : "") .
+                    (strval($l) ? " #" . strval($l) : "")
+            );
+            write_mail($t, $m, $l);
         }
         return TRUE;
     } else {
