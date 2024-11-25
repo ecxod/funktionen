@@ -63,6 +63,7 @@ function logg(string|array $t, string $m = NULL, int $l = NULL): bool
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
+function write_mail(string $t = NULL, string $m = NULL, int $l = NULL): void
 {
     // TODO:. die methode muss noch geschrieben werden :)))
     return;
