@@ -79,6 +79,7 @@ function write_mail(string $t = NULL, string $m = NULL, int $l = NULL): void
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
+function error_log_array(array $arr, string $m = NULL, int $l = NULL): void
 {
     logg("array(" . json_encode($arr) . ")", $m, $l);
     return;
