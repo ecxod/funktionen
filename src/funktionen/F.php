@@ -199,6 +199,12 @@ function libraryLoaded(string $library, string $document_root = null): bool
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
+function addIfNotExists(&$array, $element): void
+{
+    if (!in_array($element, $array)) {
+        $array[] = $element;
+    }
+}
 
 /** 
  * TODO: sollte in ::A gesteuert werden und soll wenn möglich keine Session sein.
