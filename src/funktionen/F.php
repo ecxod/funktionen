@@ -299,7 +299,9 @@ function sayonara(): void
         session_destroy();
         session_write_close();
         setcookie(session_name(), '', 0, '/');
-        if (session_status() === PHP_SESSION_ACTIVE) {session_regenerate_id(true);}
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
         session_start();
     }
 }
