@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace Ecxod\Funktionen;
 
+/**
+ * @param string $string 
+ * @return string 
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
 function c(string $string): string
 {
     //return preg_replace('/[^A-Za-z0-9\-_\.\;\& ]/', '', $string);
@@ -13,7 +19,14 @@ function c(string $string): string
     return $string;
 }
 
-function logg(string $t, string $m = NULL, int $l = NULL)
+/**
+ * @param string|array $t 
+ * @param string|null $m 
+ * @param int|null $l 
+ * @return true
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
 {
     if (!empty($m) and file_exists(strval($m))) {
         $m = basename(strval($m));
@@ -38,22 +51,44 @@ function logg(string $t, string $m = NULL, int $l = NULL)
     }
 }
 
-function write_mail(string $t = NULL, string $m = NULL, int $l = NULL)
+/**
+ * write a email - not jet used
+ * 
+ * @param string|null $t 
+ * @param string|null $m 
+ * @param int|null $l 
+ * @return void 
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
 {
     // TODO:. die methode muss noch geschrieben werden :)))
     return;
 }
 
-function error_log_array(array $arr, string $m = NULL, int $l = NULL)
+/** 
+ * diese function gehoert zu logg() und soll helfen arrays loggen
+ * 
+ * @param array $arr 
+ * @param string|null $m 
+ * @param int|null $l 
+ * @return void 
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
 {
     logg("array(" . json_encode($arr) . ")", $m, $l);
     return;
 }
 
-/** Fügt (nur mir!) HTML Kommentare in den code ein.
+/** 
+ * Fügt (nur mir!) HTML Kommentare in den code ein.
  * Idealerweise ist Argument 1 die Methode. Das erscheint dann als KLASE::METHODE
+ * 
  * @param string $m  
  * @return string 
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
  */
 function m(string $m): string
 {
@@ -64,6 +99,8 @@ function m(string $m): string
  * isMobile detects mobile devices
  * 
  * @return bool
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
  */
 function isMobile(): bool
 {
@@ -81,6 +118,13 @@ function mob_str()
     return implode("|", mobile_geraete);
 }
 
+/** 
+ * Detects me ;-)
+ * 
+ * @return bool
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
 function isMe(): bool
 {
     $myIp = "";
@@ -100,7 +144,8 @@ function isMe(): bool
 }
 
 
-/** Function is checking if a library is loaded.
+/** 
+ * Function is checking if a library is loaded.
  * If there is no composer.lock file, it will return false.
  * 
  * @param string $library 
@@ -141,13 +186,22 @@ function libraryLoaded(string $library, string $document_root = null): bool
     }
 }
 
+/**
+ * check if an element is not in an array and add it if it's missing using the in_array function in PHP.
+ * 
+ * @param mixed $array 
+ * @param mixed $element 
+ * @return void
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
 
-
-/** to.do.
- * sollte in ::A gesteuert werden
- * und soll wenn möglich keine Session sein.
+/** 
+ * TODO: sollte in ::A gesteuert werden und soll wenn möglich keine Session sein.
  * 
  * @return void
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
  */
 function userAgent(): void
 {
@@ -225,6 +279,8 @@ function userAgent(): void
 /** Logout
  *
  * @return void
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
  */
 function sayonara(): void
 {
@@ -244,6 +300,8 @@ function sayonara(): void
  * Wenn er keine HTTP_ACCEPT_LANGUAGE bekommt, setzte er alles auf englisch.
  * 
  * @return void
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
  */
 function languageManagement(): void
 {
@@ -264,7 +322,12 @@ function languageManagement(): void
     }
 }
 
-function dotEnv(string $envfile='.env'): void
+/**
+ * @param string $envfile 
+ * @return void
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
 {
     $envpath = realpath($_SERVER['DOCUMENT_ROOT'] . '/../');
     if ($envpath) {
