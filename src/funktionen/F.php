@@ -191,7 +191,12 @@ function libraryLoaded(string $library, string $document_root = null): bool
 }
 
 /**
- * check if an element is not in an array and add it if it's missing using the in_array function in PHP.
+ * check if an element is not in an array and add if 
+ * it's missing using the in_array function in PHP.
+ * 
+ * $myArray = ['apple', 'banana'];
+ * addIfNotExists($myArray, 'orange');
+ * addIfNotExists($myArray, 'banana');
  * 
  * @param mixed $array 
  * @param mixed $element 
