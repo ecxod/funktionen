@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ecxod\Funktionen;
 
+use \Dotenv\Dotenv;
+use function \realpath;
+
 /**
  * @param string $string 
  * @return string 
@@ -350,18 +353,51 @@ function dotEnv(string $envfile = '.env'): void
     if (class_exists('Dotenv\Dotenv')) {
         $envpath = realpath($_SERVER['DOCUMENT_ROOT'] . '/../');
         if ($envpath) {
-            $dotenv = \Dotenv\Dotenv::createImmutable($envpath, $envfile);
+            $dotenv = Dotenv::createImmutable($envpath, $envfile);
             $dotenv->load();
             $dotenv->required('CHARSET')->notEmpty();
             $dotenv->required('CHARSET')->allowedValues(['ISO-8859-1', 'ISO-8859-2', 'UTF8', 'UTF-8']);
             $dotenv->required('LOCALEDIR')->notEmpty();
             $dotenv->required('DSNMAPPING')->notEmpty();
         }
+    }else {
+        if (function_exists('Sentry\captureMessage')) {
+            \Sentry\captureMessage("Class Dotenv\Dotenv is not loaded");
+        }
+        die("ERROR: Starting problem, please put oil.");
+    }
+}
+
+
+function load_dotenv(string $envfile = '.env')
+{
+    if (empty($envDotEnv) and !empty($_ENV["DOTENV"])) {
+        $envDotEnv = realpath(strval($_ENV["DOTENV"]));
+    }
+    if (empty($envDotEnv) and !empty(getenv("DOTENV"))) {
+        $envDotEnv = realpath(strval(getenv("DOTENV")));
+    }
+    if (empty($envDotEnv) and empty(getenv("DOTENV")) and empty($_ENV["DOTENV"])) {
+        $envDotEnv = strval(realpath($_SERVER['DOCUMENT_ROOT'] . '/../'));
+    }
+    if (empty($envDotEnv)) {
+        die("ERROR: Initialisation problem");
+    }
+    if (class_exists('Dotenv\Dotenv')) {
+        if ($envDotEnv) {
+            $dotenv = Dotenv::createImmutable($envDotEnv, $envfile);
+            $dotenv->load();
+            $dotenv->required('CHARSET')->allowedValues(['UTF-8', 'utf8', 'utf-8']);
+            $dotenv->required('AUTOLOAD')->notEmpty();
+            $dotenv->required('PHPCLS')->notEmpty();
+            $dotenv->required('TERM')->notEmpty();
+        }
     } else {
         if (function_exists('Sentry\captureMessage')) {
             \Sentry\captureMessage("Class Dotenv\Dotenv is not loaded");
-        } else {
-            logg("### Class Dotenv\Dotenv is not loaded");
         }
+        die("ERROR: Starting problem, please put oil.");
     }
+
+    return;
 }
