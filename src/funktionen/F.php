@@ -347,11 +347,23 @@ function languageManagement(): void
  * @return void
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
+ * @deprecated Use function load_dotenv
  */
 function dotEnv(string $envfile = '.env'): void
 {
+    if (empty($envpath) and !empty($_ENV["DOTENV"])) {
+        $envpath = realpath(strval($_ENV["DOTENV"]));
+    }
+    if (empty($envpath) and !empty(getenv("DOTENV"))) {
+        $envpath = realpath(strval(getenv("DOTENV")));
+    }
+    if (empty($envpath) and empty(getenv("DOTENV")) and empty($_ENV["DOTENV"])) {
+        $envpath = strval(realpath($_SERVER['DOCUMENT_ROOT'] . '/../'));
+    }
+    if (empty($envpath)) {
+        die("ERROR: Initialisation problem");
+    }
     if (class_exists('Dotenv\Dotenv')) {
-        $envpath = realpath($_SERVER['DOCUMENT_ROOT'] . '/../');
         if ($envpath) {
             $dotenv = Dotenv::createImmutable($envpath, $envfile);
             $dotenv->load();
@@ -368,24 +380,29 @@ function dotEnv(string $envfile = '.env'): void
     }
 }
 
-
+/**
+ * @param string $envfile 
+ * @return void
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
 function load_dotenv(string $envfile = '.env')
 {
-    if (empty($envDotEnv) and !empty($_ENV["DOTENV"])) {
-        $envDotEnv = realpath(strval($_ENV["DOTENV"]));
+    if (empty($envpath) and !empty($_ENV["DOTENV"])) {
+        $envpath = realpath(strval($_ENV["DOTENV"]));
     }
-    if (empty($envDotEnv) and !empty(getenv("DOTENV"))) {
-        $envDotEnv = realpath(strval(getenv("DOTENV")));
+    if (empty($envpath) and !empty(getenv("DOTENV"))) {
+        $envpath = realpath(strval(getenv("DOTENV")));
     }
-    if (empty($envDotEnv) and empty(getenv("DOTENV")) and empty($_ENV["DOTENV"])) {
-        $envDotEnv = strval(realpath($_SERVER['DOCUMENT_ROOT'] . '/../'));
+    if (empty($envpath) and empty(getenv("DOTENV")) and empty($_ENV["DOTENV"])) {
+        $envpath = strval(realpath($_SERVER['DOCUMENT_ROOT'] . '/../'));
     }
-    if (empty($envDotEnv)) {
+    if (empty($envpath)) {
         die("ERROR: Initialisation problem");
     }
     if (class_exists('Dotenv\Dotenv')) {
-        if ($envDotEnv) {
-            $dotenv = Dotenv::createImmutable($envDotEnv, $envfile);
+        if ($envpath) {
+            $dotenv = Dotenv::createImmutable($envpath, $envfile);
             $dotenv->load();
             $dotenv->required('CHARSET')->allowedValues(['UTF-8', 'utf8', 'utf-8']);
             $dotenv->required('AUTOLOAD')->notEmpty();
@@ -397,6 +414,31 @@ function load_dotenv(string $envfile = '.env')
             \Sentry\captureMessage("Class Dotenv\Dotenv is not loaded");
         }
         die("ERROR: Starting problem, please put oil.");
+    }
+
+    return;
+}
+
+function load_locale()
+{
+    // https://www.php.net/manual/en/locale.getdisplayregion.php#119895
+
+    $_SESSION["lang"] = isset($_COOKIE['lang']) ? strval($_COOKIE['lang']) : 'de'; // wird vom User im Dropdown gesetzt
+    $_SESSION['locale_from_http'] ?? "de_DE";
+    if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        $_SESSION['locale_from_http'] = strval(value: \Locale::acceptFromHttp(header: strval(value: $_SERVER['HTTP_ACCEPT_LANGUAGE'])));
+        $_SESSION['locale_canonicalize'] = strval(value: \Locale::canonicalize(locale: strval(value: $_SESSION['locale_from_http'])));
+        $_SESSION['locale_display_language'] = strval(value: \Locale::getDisplayLanguage(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
+        $_SESSION['locale_display_region'] = strval(value: \Locale::getDisplayRegion(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
+        if (class_exists("Ecxod\\Funktionen\\K") and K::DEBUGOPT) {
+            error_log(
+                "2_HTTP_ACCEPT_LANGUAGE=" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] .
+                    "/from_http=" . $_SESSION['locale_from_http'] .
+                    "/canonicalize=" . $_SESSION['locale_canonicalize'] .
+                    "/display_language=" . $_SESSION['locale_display_language'] .
+                    "/display_region=" . $_SESSION['locale_display_region']
+            );
+        }
     }
 
     return;
