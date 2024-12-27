@@ -342,38 +342,43 @@ function languageManagement(): void
     }
 }
 
-/**
+/** 
  * @param string $envfile 
  * @return void
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
- * @deprecated Use function load_dotenv
+ * @legacy Use function load_dotenv
+ * //TODO wir müssen hier festlegen bei welchen namespace was geladen wird
  */
 function dotEnv(string $envfile = '.env', string $namespace = null): void
 {
     if (empty($envpath) and !empty($_ENV["DOTENV"])) {
-        $envpath = realpath(strval($_ENV["DOTENV"]));
+        $envpath = realpath(path: strval(value: $_ENV["DOTENV"]));
     }
-    if (empty($envpath) and !empty(getenv("DOTENV"))) {
-        $envpath = realpath(strval(getenv("DOTENV")));
+    if (empty($envpath) and !empty(getenv(name: "DOTENV"))) {
+        $envpath = realpath(path: strval(value: getenv(name: "DOTENV")));
     }
-    if (empty($envpath) and empty(getenv("DOTENV")) and empty($_ENV["DOTENV"])) {
-        $envpath = strval(realpath($_SERVER['DOCUMENT_ROOT'] . '/../'));
+    if (empty($envpath) and empty(getenv(name: "DOTENV")) and empty($_ENV["DOTENV"])) {
+        $envpath = strval(value: realpath(path: $_SERVER['DOCUMENT_ROOT'] . '/../'));
     }
     if (empty($envpath)) {
         die("ERROR: Initialisation problem");
     }
-    if (class_exists('Dotenv\Dotenv')) {
+    if (class_exists(class: 'Dotenv\Dotenv')) {
         if ($envpath) {
-            $dotenv = Dotenv::createImmutable($envpath, $envfile);
+            $dotenv = Dotenv::createImmutable($envpath);
             $dotenv->load();
             $dotenv->required('CHARSET')->notEmpty();
             $dotenv->required('CHARSET')->allowedValues(['ISO-8859-1', 'ISO-8859-2', 'UTF8', 'UTF-8']);
-            $dotenv->required('LOCALEDIR')->notEmpty();
             $dotenv->required('DSNMAPPING')->notEmpty();
+            $dotenv->required('NAMESPACE')->notEmpty();
+            $dotenv->required('LOCALEDIR')->notEmpty();
+            $dotenv->required('AUTOLOAD')->notEmpty();
+            $dotenv->required('PHPCLS')->notEmpty();
+            $dotenv->required('TERM')->notEmpty();
         }
     } else {
-        if (function_exists('Sentry\captureMessage')) {
+        if (function_exists(function: 'Sentry\captureMessage')) {
             \Sentry\captureMessage("Class Dotenv\Dotenv is not loaded");
         }
         die("ERROR: Starting problem, please put oil.");
