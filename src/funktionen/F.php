@@ -209,7 +209,7 @@ function libraryLoaded(string $library, string $document_root = null): bool
  */
 function addIfNotExists(&$array, $element): void
 {
-    if (!in_array($element, $array)) {
+    if (!in_array(needle: $element, haystack: $array)) {
         $array[] = $element;
     }
 }
@@ -236,29 +236,29 @@ function userAgent(): void
 
         $userAgent = preg_split("/[\(\)]/", $_SERVER['HTTP_USER_AGENT'], 3);
         // Wenn alles mit Mozilla beginnt.
-        $el = array(); // oder besser unset ? to.do.
+        $el = []; // oder besser unset ? to.do.
 
         foreach ($userAgent as $key => $val) {
 
-            $varr = explode("/", preg_replace('/\((.*)\)/', '', trim($val)));
-            $parr = explode(";", preg_replace('/\((.*)\)/', '', trim($val)));
-            $barr = explode(" ", preg_replace('/\((.*)\)/', '', trim($val)));
+            $varr = explode(separator: "/", string: preg_replace(pattern: '/\((.*)\)/', replacement: '', subject: trim(string: $val)));
+            $parr = explode(separator: ";", string: preg_replace(pattern: '/\((.*)\)/', replacement: '', subject: trim(string: $val)));
+            $barr = explode(separator: " ", string: preg_replace(pattern: '/\((.*)\)/', replacement: '', subject: trim(string: $val)));
 
-            $el[$key] = array();
+            $el[$key] = [];
 
             if ($key === 0) {
                 $el[$key]['generic'] = $varr[0];
-                $el[$key]['htmlver'] = (isset($varr[1]) ? $varr[1] : null);
+                $el[$key]['htmlver'] = $varr[1] ?? null;
             }
 
             if ($key === 1) {
                 foreach ($parr as $k => $v) {
                     if ($k == 0)
-                        $el[$key]['platform'] = str_replace(['(', ')'], '', trim($parr[$k]));
+                        $el[$key]["platform"] = str_replace(search: ['(', ')'], replace: '', subject: trim(string: $parr[$k]));
                     if ($k == 1)
-                        $el[$key]['version'] = str_replace(['(', ')'], '', trim($parr[$k]));
+                        $el[$key]["version"] = str_replace(search: ['(', ')'], replace: '', subject: trim(string: $parr[$k]));
                     if ($k >= 2)
-                        $el[$key]['val' . $k] = str_replace(['(', ')'], '', trim($parr[$k]));
+                        $el[$key]["val$k"] = str_replace(search: ['(', ')'], replace: '', subject: trim(string: $parr[$k]));
                 }
             }
 
@@ -349,7 +349,7 @@ function languageManagement(): void
  * @version 1.0.0
  * @deprecated Use function load_dotenv
  */
-function dotEnv(string $envfile = '.env'): void
+function dotEnv(string $envfile = '.env', string $namespace = null): void
 {
     if (empty($envpath) and !empty($_ENV["DOTENV"])) {
         $envpath = realpath(strval($_ENV["DOTENV"]));
@@ -372,7 +372,7 @@ function dotEnv(string $envfile = '.env'): void
             $dotenv->required('LOCALEDIR')->notEmpty();
             $dotenv->required('DSNMAPPING')->notEmpty();
         }
-    }else {
+    } else {
         if (function_exists('Sentry\captureMessage')) {
             \Sentry\captureMessage("Class Dotenv\Dotenv is not loaded");
         }
