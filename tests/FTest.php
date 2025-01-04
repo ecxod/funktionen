@@ -64,18 +64,10 @@ class FTest extends TestCase
      */
     public function testLogg()
     {
-
+        $this->expectNotToPerformAssertions();
     }
 
 
 
 }
-class IgnoreWarningsListener implements TestListener
-{
-    use TestListenerDefaultImplementation;
 
-    public function addWarning(Test $test, Warning $e, float $time): void
-    {
-        // Hier könntest du Warnungen als "Bestanden" markieren oder ignorieren
-    }
-}
