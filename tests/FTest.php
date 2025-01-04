@@ -4,6 +4,8 @@ namespace Ecxod\Tests;
 
 use Ecxod\Funktionen;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestListener;
+use PHPUnit\Framework\TestListenerDefaultImplementation;
 
 class FTest extends TestCase
 {
@@ -53,5 +55,27 @@ class FTest extends TestCase
             }
             rmdir(directory: $dir);
         }
+    }
+
+
+    /** 
+     * @return void
+     * @doesNotPerformAssertions
+     */
+    public function testLogg()
+    {
+
+    }
+
+
+
+}
+class IgnoreWarningsListener implements TestListener
+{
+    use TestListenerDefaultImplementation;
+
+    public function addWarning(Test $test, Warning $e, float $time): void
+    {
+        // Hier könntest du Warnungen als "Bestanden" markieren oder ignorieren
     }
 }
