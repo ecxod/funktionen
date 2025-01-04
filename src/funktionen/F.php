@@ -5,7 +5,27 @@ declare(strict_types=1);
 namespace Ecxod\Funktionen;
 
 use \Dotenv\Dotenv;
-use function \realpath;
+use \Sentry\State;
+use \Sentry\Severity;
+
+use Locale;
+use Sentry\State\Scope;
+use function array_merge;
+use function basename;
+use function class_exists;
+use function error_log;
+use function explode;
+use function file_exists;
+use function file_get_contents;
+use function implode;
+use function is_writable;
+use function json_decode;
+use function realpath;
+use function Sentry\captureMessage;
+use function Sentry\withScope;
+use function strval;
+
+
 
 /**
  * @param string $string 
@@ -32,16 +52,16 @@ function c(string $string): string
  */
 function logg(string|array $t, string $m = null, int $l = null): bool
 {
-    if(!empty($m) and file_exists(strval($m)))
+    if(!empty($m) and \file_exists(filename: \strval(value: $m)))
     {
-        $m = basename(strval($m));
+        $m = \basename(path: \strval(value: $m));
     }
-    if(gettype($t) === 'array')
+    if(\gettype($t) === 'array')
     {
         if(isset($_ENV['ERRORLOG']))
         {
-            error_log_array($t, $m, $l);
-            write_mail($t, $m, $l);
+            \Ecxod\Funktionen\error_log_array(arr: $t, m: $m, l: $l);
+            \Ecxod\Funktionen\write_mail(t: $t, m: $m, l: $l);
         }
         return true;
     }
@@ -49,12 +69,12 @@ function logg(string|array $t, string $m = null, int $l = null): bool
     {
         if($_ENV['ERRORLOG'])
         {
-            error_log(
-                (strval($t) ? strval($t) : 'ERROR') .
-                (strval($m) ? " in " . strval($m) : "") .
-                (strval($l) ? " #" . strval($l) : "")
+            \error_log(
+                message: (strval($t) ?: 'ERROR') .
+                (\strval($m) ? " in " . \strval($m) : "") .
+                (\strval($l) ? " #" . \strval($l) : "")
             );
-            write_mail($t, $m, $l);
+            \Ecxod\Funktionen\write_mail($t, $m, $l);
         }
         return true;
     }
@@ -63,6 +83,19 @@ function logg(string|array $t, string $m = null, int $l = null): bool
         return true;
     }
 }
+
+
+function sentry_warning(string $warningtext)
+{
+    withScope(
+        function (Scope $scope) use ($warningtext): void
+        {
+            $scope->setLevel(Severity::warning());
+            captureMessage($warningtext);
+        }
+    );
+}
+
 
 /**
  * write a email - not jet used
@@ -112,7 +145,7 @@ function h(string $m, string $f = null, string $l = null): void
         isMe()
     )
     {
-        if(is_writable(filename: strval(value: $_ENV['DEBUGLOG'])))
+        if(\is_writable(filename: \strval(value: $_ENV['DEBUGLOG'])))
         {
             $kl = explode(separator: '::', string: $m)[0];
             $fu = explode(separator: '::', string: $m)[1];
@@ -127,11 +160,12 @@ function h(string $m, string $f = null, string $l = null): void
             {
                 touch(filename: $_ENV['DEBUGLOG']);
             }
-            catch (\Exception $e)
+            catch (\Throwable $exception)
             {
-                error_log(message: "\n=======================================\n");
-                error_log(message: "\nACHTUNG !!! Kann nicht schreiben in: " . $_ENV['DEBUGLOG'] . " in " . __METHOD__);
-                error_log(message: "\n=======================================\n");
+                \Sentry\captureException($exception);
+                \error_log(message: "\n=======================================\n");
+                \error_log(message: "\nACHTUNG !!! Kann nicht schreiben in: " . $_ENV['DEBUGLOG'] . " in " . __METHOD__);
+                \error_log(message: "\n=======================================\n");
             }
         }
     }
@@ -140,6 +174,7 @@ function h(string $m, string $f = null, string $l = null): void
         return;
     }
 }
+
 
 /** 
  * Fügt (nur mir!) HTML Kommentare in den code ein.
@@ -232,10 +267,10 @@ function libraryLoaded(string $library, string $document_root = null): bool
         $document_root = $_SERVER['DOCUMENT_ROOT'];
     }
 
-    if(file_exists($document_root . '/composer.lock'))
+    if(\file_exists($document_root . '/composer.lock'))
     {
-        $composerLock = json_decode(file_get_contents('composer.lock'), true);
-        $packages = array_merge($composerLock['packages'], $composerLock['packages-dev']);
+        $composerLock = \json_decode(\file_get_contents('composer.lock'), true);
+        $packages = \array_merge($composerLock['packages'], $composerLock['packages-dev']);
 
         $libraryFound = false;
         foreach($packages as $package)
@@ -388,17 +423,17 @@ function userAgent(): void
  */
 function sayonara(): void
 {
-    if(session_status() === PHP_SESSION_ACTIVE)
+    if(\session_status() === PHP_SESSION_ACTIVE)
     {
-        session_unset();
-        session_destroy();
-        session_write_close();
-        setcookie(session_name(), '', 0, '/');
-        if(session_status() === PHP_SESSION_ACTIVE)
+        \session_unset();
+        \session_destroy();
+        \session_write_close();
+        \setcookie(name: \session_name(), value: '', expires_or_options: 0, path: '/');
+        if(\session_status() === PHP_SESSION_ACTIVE)
         {
-            session_regenerate_id(true);
+            \session_regenerate_id(delete_old_session: true);
         }
-        session_start();
+        \session_start();
     }
 }
 
@@ -420,15 +455,15 @@ function languageManagement(): void
     }
     else
     {
-        $locale_from_http = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-        $_SESSION['locale_canonicalize'] = strval(\Locale::canonicalize($locale_from_http));
-        $_SESSION['locale_display_language'] = strval(locale_get_display_language(
-            $locale_from_http,
-            isset($_COOKIE['la']) ? $_COOKIE['la'] : 'en'
+        $locale_from_http = locale_accept_from_http(header: $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        $_SESSION['locale_canonicalize'] = strval(value: Locale::canonicalize($locale_from_http));
+        $_SESSION['locale_display_language'] = strval(value: locale_get_display_language(
+            locale: $locale_from_http,
+            displayLocale: isset($_COOKIE['la']) ? $_COOKIE['la'] : 'en'
         ));
-        $_SESSION['locale_display_region'] = strval(locale_get_display_region(
-            $locale_from_http,
-            isset($_COOKIE['la']) ? $_COOKIE['la'] : 'en'
+        $_SESSION['locale_display_region'] = strval(value: locale_get_display_region(
+            locale: $locale_from_http,
+            displayLocale: $_COOKIE['la'] ?? 'en'
         ));
     }
 }
@@ -491,25 +526,25 @@ function dotEnv(string $envfile = '.env', string $namespace = null): void
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
-function load_dotenv(string $envfile = '.env')
+function load_dotenv(string $envfile = '.env'): void
 {
     if(empty($envpath) and !empty($_ENV["DOTENV"]))
     {
-        $envpath = realpath(strval($_ENV["DOTENV"]));
+        $envpath = realpath(path: strval(value: $_ENV["DOTENV"]));
     }
-    if(empty($envpath) and !empty(getenv("DOTENV")))
+    if(empty($envpath) and !empty(getenv(name: "DOTENV")))
     {
-        $envpath = realpath(strval(getenv("DOTENV")));
+        $envpath = \realpath(path: \strval(value: \getenv(name: "DOTENV")));
     }
-    if(empty($envpath) and empty(getenv("DOTENV")) and empty($_ENV["DOTENV"]))
+    if(empty($envpath) and empty(\getenv("DOTENV")) and empty($_ENV["DOTENV"]))
     {
-        $envpath = strval(realpath($_SERVER['DOCUMENT_ROOT'] . '/../'));
+        $envpath = \strval(\realpath($_SERVER['DOCUMENT_ROOT'] . '/../'));
     }
     if(empty($envpath))
     {
         die("ERROR: Initialisation problem");
     }
-    if(class_exists('Dotenv\Dotenv'))
+    if(class_exists(class: 'Dotenv\Dotenv'))
     {
         if($envpath)
         {
@@ -541,14 +576,14 @@ function load_locale()
     $_SESSION['locale_from_http'] ?? "de_DE";
     if(!empty($_SERVER['HTTP_ACCEPT_LANGUAGE']))
     {
-        $_SESSION['locale_from_http'] = strval(value: \Locale::acceptFromHttp(header: strval(value: $_SERVER['HTTP_ACCEPT_LANGUAGE'])));
-        $_SESSION['locale_canonicalize'] = strval(value: \Locale::canonicalize(locale: strval(value: $_SESSION['locale_from_http'])));
-        $_SESSION['locale_display_language'] = strval(value: \Locale::getDisplayLanguage(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
-        $_SESSION['locale_display_region'] = strval(value: \Locale::getDisplayRegion(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
-        if(class_exists("Ecxod\\Funktionen\\K") and K::DEBUGOPT)
+        $_SESSION['locale_from_http'] = strval(value: Locale::acceptFromHttp(header: strval(value: $_SERVER['HTTP_ACCEPT_LANGUAGE'])));
+        $_SESSION['locale_canonicalize'] = strval(value: Locale::canonicalize(locale: strval(value: $_SESSION['locale_from_http'])));
+        $_SESSION['locale_display_language'] = strval(value: Locale::getDisplayLanguage(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
+        $_SESSION['locale_display_region'] = strval(value: Locale::getDisplayRegion(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
+        if((\class_exists("Ecxod\\Funktionen\\K") and K::DEBUGOPT) or $_ENV['DEBUGOPT'])
         {
-            error_log(
-                "2_HTTP_ACCEPT_LANGUAGE=" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] .
+            \error_log(
+                message: "2_HTTP_ACCEPT_LANGUAGE=" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] .
                 "/from_http=" . $_SESSION['locale_from_http'] .
                 "/canonicalize=" . $_SESSION['locale_canonicalize'] .
                 "/display_language=" . $_SESSION['locale_display_language'] .
