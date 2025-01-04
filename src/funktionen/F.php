@@ -30,29 +30,37 @@ function c(string $string): string
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
-function logg(string|array $t, string $m = NULL, int $l = NULL): bool
+function logg(string|array $t, string $m = null, int $l = null): bool
 {
-    if (!empty($m) and file_exists(strval($m))) {
+    if(!empty($m) and file_exists(strval($m)))
+    {
         $m = basename(strval($m));
     }
-    if (gettype($t) === 'array') {
-        if (isset($_ENV['ERRORLOG'])) {
+    if(gettype($t) === 'array')
+    {
+        if(isset($_ENV['ERRORLOG']))
+        {
             error_log_array($t, $m, $l);
             write_mail($t, $m, $l);
         }
-        return TRUE;
-    } elseif (gettype($t) === 'string') {
-        if ($_ENV['ERRORLOG']) {
+        return true;
+    }
+    elseif(gettype($t) === 'string')
+    {
+        if($_ENV['ERRORLOG'])
+        {
             error_log(
                 (strval($t) ? strval($t) : 'ERROR') .
-                    (strval($m) ? " in " . strval($m) : "") .
-                    (strval($l) ? " #" . strval($l) : "")
+                (strval($m) ? " in " . strval($m) : "") .
+                (strval($l) ? " #" . strval($l) : "")
             );
             write_mail($t, $m, $l);
         }
-        return TRUE;
-    } else {
-        return TRUE;
+        return true;
+    }
+    else
+    {
+        return true;
     }
 }
 
@@ -66,7 +74,7 @@ function logg(string|array $t, string $m = NULL, int $l = NULL): bool
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
-function write_mail(string $t = NULL, string $m = NULL, int $l = NULL): void
+function write_mail(string $t = null, string $m = null, int $l = null): void
 {
     // TODO:. die methode muss noch geschrieben werden :)))
     return;
@@ -82,10 +90,55 @@ function write_mail(string $t = NULL, string $m = NULL, int $l = NULL): void
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
-function error_log_array(array $arr, string $m = NULL, int $l = NULL): void
+function error_log_array(array $arr, string $m = null, int $l = null): void
 {
     logg("array(" . json_encode($arr) . ")", $m, $l);
     return;
+}
+
+/** wenn ich und $_ENV['DEBUGOPT'] wahr => wird genauer geloggd
+ * @param string $m Method (__METHOD__)
+ * @param string|null $f File (__FILE__)
+ * @param string|null $l Line (__LINE__)
+ * @return void 
+ */
+function h(string $m, string $f = null, string $l = null): void
+{
+    if(
+        !empty($_ENV['DEBUGOPT']) and
+        !empty($_ENV['DEBUGLOG']) and
+        explode(separator: ':', string: $m)[0] !== 'D' and
+        explode(separator: ':', string: $m)[0] !== 'MENUE' and
+        isMe()
+    )
+    {
+        if(is_writable(filename: strval(value: $_ENV['DEBUGLOG'])))
+        {
+            $kl = explode(separator: '::', string: $m)[0];
+            $fu = explode(separator: '::', string: $m)[1];
+            if(!empty($kl) and !empty($fu) and method_exists(object_or_class: $kl, method: $fu))
+                error_log(message: "\n >>> $m (method)\r", message_type: 3, destination: $_ENV['DEBUGLOG']);
+            if((empty($kl) or empty($fu) or !method_exists(object_or_class: $kl, method: $fu)) and file_exists(filename: $f))
+                error_log(message: "\n >>> " . basename(path: $f) . " (file) " . $l, message_type: 3, destination: $_ENV['DEBUGLOG']);
+        }
+        else
+        {
+            try
+            {
+                touch(filename: $_ENV['DEBUGLOG']);
+            }
+            catch (\Exception $e)
+            {
+                error_log(message: "\n=======================================\n");
+                error_log(message: "\nACHTUNG !!! Kann nicht schreiben in: " . $_ENV['DEBUGLOG'] . " in " . __METHOD__);
+                error_log(message: "\n=======================================\n");
+            }
+        }
+    }
+    else
+    {
+        return;
+    }
 }
 
 /** 
@@ -111,15 +164,18 @@ function m(string $m): string
  */
 function isMobile(): bool
 {
-    if (isset($_SERVER["HTTP_USER_AGENT"])) {
+    if(isset($_SERVER["HTTP_USER_AGENT"]))
+    {
         // preg_match(pattern, subject)
         return boolval(preg_match("/(" . mob_str() . ")/i", $_SERVER["HTTP_USER_AGENT"]));
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
 
-const mobile_geraete = ["android", "avantgo", "blackberry", "bolt", "boost", "cricket", "docomo", "fone", "hiptop", "mini", "mobi", "palm", "phone", "pie", "tablet", "up\.browser", "up\.link", "webos", "wos", "iphone", "ipad"];
+const mobile_geraete = [ "android", "avantgo", "blackberry", "bolt", "boost", "cricket", "docomo", "fone", "hiptop", "mini", "mobi", "palm", "phone", "pie", "tablet", "up\.browser", "up\.link", "webos", "wos", "iphone", "ipad" ];
 function mob_str(): string
 {
     return implode("|", mobile_geraete);
@@ -135,17 +191,24 @@ function mob_str(): string
 function isMe(): bool
 {
     $myIp = "";
-    if (empty($myIp)) $myIp = strval(value: $_ENV['MYIP']);
-    if (empty($myIp)) $myIp = strval(value: getenv(name: 'MYIP'));
-    if (empty($myIp)) {
+    if(empty($myIp))
+        $myIp = strval(value: $_ENV['MYIP']);
+    if(empty($myIp))
+        $myIp = strval(value: getenv(name: 'MYIP'));
+    if(empty($myIp))
+    {
         die("ERROR: " . __METHOD__);
-    } else if (
+    }
+    else if(
         !empty($myIp) and
         isset($_SERVER['REMOTE_ADDR']) and !empty($_SERVER['REMOTE_ADDR']) and
         \in_array(needle: $_SERVER['REMOTE_ADDR'], haystack: explode(separator: ",", string: $myIp))
-    ) {
+    )
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
@@ -164,30 +227,39 @@ function isMe(): bool
  */
 function libraryLoaded(string $library, string $document_root = null): bool
 {
-    if ($document_root === null) {
+    if($document_root === null)
+    {
         $document_root = $_SERVER['DOCUMENT_ROOT'];
     }
 
-    if (file_exists($document_root . '/composer.lock')) {
+    if(file_exists($document_root . '/composer.lock'))
+    {
         $composerLock = json_decode(file_get_contents('composer.lock'), true);
         $packages = array_merge($composerLock['packages'], $composerLock['packages-dev']);
 
         $libraryFound = false;
-        foreach ($packages as $package) {
-            if ($package['name'] === $library) {
+        foreach($packages as $package)
+        {
+            if($package['name'] === $library)
+            {
                 $libraryFound = true;
                 break;
             }
         }
 
-        if ($libraryFound) {
+        if($libraryFound)
+        {
             // Library is required in this project.
             return true;
-        } else {
+        }
+        else
+        {
             // Library is not required in this project.
             return false;
         }
-    } else {
+    }
+    else
+    {
         // Couldn't find composer.lock file.
         return false;
     }
@@ -209,7 +281,8 @@ function libraryLoaded(string $library, string $document_root = null): bool
  */
 function addIfNotExists(&$array, $element): void
 {
-    if (!in_array(needle: $element, haystack: $array)) {
+    if(!in_array(needle: $element, haystack: $array))
+    {
         $array[] = $element;
     }
 }
@@ -232,13 +305,15 @@ function userAgent(): void
     // Mozilla/5.0 (iPhone; CPU iPhone OS 13_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Mobile/15E148 Safari/604.1
     // Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0)
 
-    if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+    if(!empty($_SERVER['HTTP_USER_AGENT']))
+    {
 
         $userAgent = preg_split("/[\(\)]/", $_SERVER['HTTP_USER_AGENT'], 3);
         // Wenn alles mit Mozilla beginnt.
         $el = []; // oder besser unset ? to.do.
 
-        foreach ($userAgent as $key => $val) {
+        foreach($userAgent as $key => $val)
+        {
 
             $varr = explode(separator: "/", string: preg_replace(pattern: '/\((.*)\)/', replacement: '', subject: trim(string: $val)));
             $parr = explode(separator: ";", string: preg_replace(pattern: '/\((.*)\)/', replacement: '', subject: trim(string: $val)));
@@ -246,28 +321,34 @@ function userAgent(): void
 
             $el[$key] = [];
 
-            if ($key === 0) {
+            if($key === 0)
+            {
                 $el[$key]['generic'] = $varr[0];
                 $el[$key]['htmlver'] = $varr[1] ?? null;
             }
 
-            if ($key === 1) {
-                foreach ($parr as $k => $v) {
-                    if ($k == 0)
-                        $el[$key]["platform"] = str_replace(search: ['(', ')'], replace: '', subject: trim(string: $parr[$k]));
-                    if ($k == 1)
-                        $el[$key]["version"] = str_replace(search: ['(', ')'], replace: '', subject: trim(string: $parr[$k]));
-                    if ($k >= 2)
-                        $el[$key]["val$k"] = str_replace(search: ['(', ')'], replace: '', subject: trim(string: $parr[$k]));
+            if($key === 1)
+            {
+                foreach($parr as $k => $v)
+                {
+                    if($k == 0)
+                        $el[$key]["platform"] = str_replace(search: [ '(', ')' ], replace: '', subject: trim(string: $parr[$k]));
+                    if($k == 1)
+                        $el[$key]["version"] = str_replace(search: [ '(', ')' ], replace: '', subject: trim(string: $parr[$k]));
+                    if($k >= 2)
+                        $el[$key]["val$k"] = str_replace(search: [ '(', ')' ], replace: '', subject: trim(string: $parr[$k]));
                 }
             }
 
-            if ($key === 2) {
+            if($key === 2)
+            {
                 $n = 0;
                 $bl = array();
-                foreach ($barr as $i => $j) {
+                foreach($barr as $i => $j)
+                {
                     $jj = explode("/", preg_replace('/\((.*)\)/', '', trim($j)));
-                    if (!empty(trim($jj[0]))) {
+                    if(!empty(trim($jj[0])))
+                    {
                         $el[$key + $n]['product'] = $jj[0];
                         $bl[$n] = $jj[0];
                         $el[$key + $n]['version'] = !empty($jj[1]) ? $jj[1] : null;
@@ -282,12 +363,17 @@ function userAgent(): void
         $_SESSION['useragent']['1']['browserlist'] = isset($bl) ? implode(',', $bl) : '';
         //F::logg($_SESSION['useragent'],__METHOD__,__LINE__);
         return;
-    } else {
+    }
+    else
+    {
 
-        if (!empty($_SESSION['useragent'])) {
+        if(!empty($_SESSION['useragent']))
+        {
             //F::logg("\$_SESSION['useragent']=" . $_SESSION['useragent'], __METHOD__, __LINE__);
             $_SESSION['useragent'] = "";
-        } else {
+        }
+        else
+        {
             $_SESSION['useragent'] = "";
         }
         return;
@@ -302,12 +388,14 @@ function userAgent(): void
  */
 function sayonara(): void
 {
-    if (session_status() === PHP_SESSION_ACTIVE) {
+    if(session_status() === PHP_SESSION_ACTIVE)
+    {
         session_unset();
         session_destroy();
         session_write_close();
         setcookie(session_name(), '', 0, '/');
-        if (session_status() === PHP_SESSION_ACTIVE) {
+        if(session_status() === PHP_SESSION_ACTIVE)
+        {
             session_regenerate_id(true);
         }
         session_start();
@@ -326,9 +414,12 @@ function sayonara(): void
 function languageManagement(): void
 {
 
-    if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+    if(empty($_SERVER['HTTP_ACCEPT_LANGUAGE']))
+    {
         $locale_from_http = "en_US";
-    } else {
+    }
+    else
+    {
         $locale_from_http = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
         $_SESSION['locale_canonicalize'] = strval(\Locale::canonicalize($locale_from_http));
         $_SESSION['locale_display_language'] = strval(locale_get_display_language(
@@ -352,24 +443,30 @@ function languageManagement(): void
  */
 function dotEnv(string $envfile = '.env', string $namespace = null): void
 {
-    if (empty($envpath) and !empty($_ENV["DOTENV"])) {
+    if(empty($envpath) and !empty($_ENV["DOTENV"]))
+    {
         $envpath = realpath(path: strval(value: $_ENV["DOTENV"]));
     }
-    if (empty($envpath) and !empty(getenv(name: "DOTENV"))) {
+    if(empty($envpath) and !empty(getenv(name: "DOTENV")))
+    {
         $envpath = realpath(path: strval(value: getenv(name: "DOTENV")));
     }
-    if (empty($envpath) and empty(getenv(name: "DOTENV")) and empty($_ENV["DOTENV"])) {
+    if(empty($envpath) and empty(getenv(name: "DOTENV")) and empty($_ENV["DOTENV"]))
+    {
         $envpath = strval(value: realpath(path: $_SERVER['DOCUMENT_ROOT'] . '/../'));
     }
-    if (empty($envpath)) {
+    if(empty($envpath))
+    {
         die("ERROR: Initialisation problem");
     }
-    if (class_exists(class: 'Dotenv\Dotenv')) {
-        if ($envpath) {
+    if(class_exists(class: 'Dotenv\Dotenv'))
+    {
+        if($envpath)
+        {
             $dotenv = Dotenv::createImmutable($envpath);
             $dotenv->load();
             $dotenv->required('CHARSET')->notEmpty();
-            $dotenv->required('CHARSET')->allowedValues(['ISO-8859-1', 'ISO-8859-2', 'UTF8', 'UTF-8']);
+            $dotenv->required('CHARSET')->allowedValues([ 'ISO-8859-1', 'ISO-8859-2', 'UTF8', 'UTF-8' ]);
             $dotenv->required('DSNMAPPING')->notEmpty();
             $dotenv->required('NAMESPACE')->notEmpty();
             $dotenv->required('LOCALEDIR')->notEmpty();
@@ -377,8 +474,11 @@ function dotEnv(string $envfile = '.env', string $namespace = null): void
             $dotenv->required('PHPCLS')->notEmpty();
             $dotenv->required('TERM')->notEmpty();
         }
-    } else {
-        if (function_exists(function: 'Sentry\captureMessage')) {
+    }
+    else
+    {
+        if(function_exists(function: 'Sentry\captureMessage'))
+        {
             \Sentry\captureMessage("Class Dotenv\Dotenv is not loaded");
         }
         die("ERROR: Starting problem, please put oil.");
@@ -393,29 +493,38 @@ function dotEnv(string $envfile = '.env', string $namespace = null): void
  */
 function load_dotenv(string $envfile = '.env')
 {
-    if (empty($envpath) and !empty($_ENV["DOTENV"])) {
+    if(empty($envpath) and !empty($_ENV["DOTENV"]))
+    {
         $envpath = realpath(strval($_ENV["DOTENV"]));
     }
-    if (empty($envpath) and !empty(getenv("DOTENV"))) {
+    if(empty($envpath) and !empty(getenv("DOTENV")))
+    {
         $envpath = realpath(strval(getenv("DOTENV")));
     }
-    if (empty($envpath) and empty(getenv("DOTENV")) and empty($_ENV["DOTENV"])) {
+    if(empty($envpath) and empty(getenv("DOTENV")) and empty($_ENV["DOTENV"]))
+    {
         $envpath = strval(realpath($_SERVER['DOCUMENT_ROOT'] . '/../'));
     }
-    if (empty($envpath)) {
+    if(empty($envpath))
+    {
         die("ERROR: Initialisation problem");
     }
-    if (class_exists('Dotenv\Dotenv')) {
-        if ($envpath) {
+    if(class_exists('Dotenv\Dotenv'))
+    {
+        if($envpath)
+        {
             $dotenv = Dotenv::createImmutable($envpath, $envfile);
             $dotenv->load();
-            $dotenv->required('CHARSET')->allowedValues(['UTF-8', 'utf8', 'utf-8']);
+            $dotenv->required('CHARSET')->allowedValues([ 'UTF-8', 'utf8', 'utf-8' ]);
             $dotenv->required('AUTOLOAD')->notEmpty();
             $dotenv->required('PHPCLS')->notEmpty();
             $dotenv->required('TERM')->notEmpty();
         }
-    } else {
-        if (function_exists('Sentry\captureMessage')) {
+    }
+    else
+    {
+        if(function_exists('Sentry\captureMessage'))
+        {
             \Sentry\captureMessage("Class Dotenv\Dotenv is not loaded");
         }
         die("ERROR: Starting problem, please put oil.");
@@ -430,18 +539,20 @@ function load_locale()
 
     $_SESSION["lang"] = isset($_COOKIE['lang']) ? strval($_COOKIE['lang']) : 'de'; // wird vom User im Dropdown gesetzt
     $_SESSION['locale_from_http'] ?? "de_DE";
-    if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+    if(!empty($_SERVER['HTTP_ACCEPT_LANGUAGE']))
+    {
         $_SESSION['locale_from_http'] = strval(value: \Locale::acceptFromHttp(header: strval(value: $_SERVER['HTTP_ACCEPT_LANGUAGE'])));
         $_SESSION['locale_canonicalize'] = strval(value: \Locale::canonicalize(locale: strval(value: $_SESSION['locale_from_http'])));
         $_SESSION['locale_display_language'] = strval(value: \Locale::getDisplayLanguage(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
         $_SESSION['locale_display_region'] = strval(value: \Locale::getDisplayRegion(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
-        if (class_exists("Ecxod\\Funktionen\\K") and K::DEBUGOPT) {
+        if(class_exists("Ecxod\\Funktionen\\K") and K::DEBUGOPT)
+        {
             error_log(
                 "2_HTTP_ACCEPT_LANGUAGE=" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] .
-                    "/from_http=" . $_SESSION['locale_from_http'] .
-                    "/canonicalize=" . $_SESSION['locale_canonicalize'] .
-                    "/display_language=" . $_SESSION['locale_display_language'] .
-                    "/display_region=" . $_SESSION['locale_display_region']
+                "/from_http=" . $_SESSION['locale_from_http'] .
+                "/canonicalize=" . $_SESSION['locale_canonicalize'] .
+                "/display_language=" . $_SESSION['locale_display_language'] .
+                "/display_region=" . $_SESSION['locale_display_region']
             );
         }
     }
