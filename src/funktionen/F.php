@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecxod\Funktionen;
 
 use \Dotenv\Dotenv;
+use \Sentry;
 use \Sentry\State;
 use \Sentry\Severity;
 
@@ -21,8 +22,9 @@ use function implode;
 use function is_writable;
 use function json_decode;
 use function realpath;
-use function Sentry\captureMessage;
-use function Sentry\withScope;
+use function \Sentry\captureException;
+use function \Sentry\captureMessage;
+use function \Sentry\withScope;
 use function strval;
 
 
