@@ -15,8 +15,8 @@ class FTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempFile = tempnam(directory: sys_get_temp_dir(), prefix: 'apache_config_');
-        $this->testDir = sys_get_temp_dir() . '/test_apache_conf';
+        $this->tempFile = tempnam(directory: sys_get_temp_dir(), prefix: 'functionen_');
+        $this->testDir = sys_get_temp_dir() . '/functionen_';
         mkdir($this->testDir);
     }
     protected function tearDown(): void
