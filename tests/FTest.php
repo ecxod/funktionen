@@ -12,14 +12,12 @@ class FTest extends TestCase
     private $tempFile;
     private $testDir;
 
-    private $apache;
 
     protected function setUp(): void
     {
         $this->tempFile = tempnam(directory: sys_get_temp_dir(), prefix: 'apache_config_');
         $this->testDir = sys_get_temp_dir() . '/test_apache_conf';
         mkdir($this->testDir);
-        $this->apache = new Apache;
     }
     protected function tearDown(): void
     {
