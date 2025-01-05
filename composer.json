@@ -34,7 +34,7 @@
         "exclude": [
             ".github",
             ".vscode",
-            "tests/ApacheTest.php",
+            "tests",
             "vendor"
         ]
     }
