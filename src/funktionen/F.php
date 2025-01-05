@@ -564,3 +564,16 @@ function load_locale()
 
     return;
 }
+
+/** returns true if JSON is valid or a errorcode if not.
+ * json_last_error: It returns an error constant, such as JSON_ERROR_NONE (no error) or others like JSON_ERROR_SYNTAX (invalid JSON).
+ * @param string $json 
+ * @return bool ex. JSON_ERROR_NONE, JSON_ERROR_SYNTAX  etc ...
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
+function is_json(string $json): bool
+{
+    json_decode(json: $json);
+    return json_last_error() === JSON_ERROR_NONE;
+}
