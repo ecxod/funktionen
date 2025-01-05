@@ -6,12 +6,10 @@
     "license": "MIT",
     "autoload": {
         "files": [
-            "src/funktionen/F.php",
-            "tests/FTest.php"
+            "src/funktionen/F.php"
         ],
         "psr-4": {
-            "Ecxod\\Funtionen\\": "src/funktionen/",
-            "Ecxod\\Tests\\": "tests"
+            "Ecxod\\Funtionen\\": "src/funktionen/"
         }
     },
     "authors": [
