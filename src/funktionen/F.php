@@ -103,7 +103,7 @@ function error_log_array(array $arr, string $m = null, int $l = null): void
  * @param string|null $t Some text
  * @return void 
  */
-function h(string $m=null, string $f = null, string $l = null, string $t = null): void
+function h(string $m = null, string $f = null, string $l = null, string $t = null): void
 {
     if(
         !empty($_ENV['DEBUGOPT']) and
@@ -324,12 +324,12 @@ function userAgent(): void
             $parr = explode(separator: ";", string: preg_replace(pattern: '/\((.*)\)/', replacement: '', subject: trim(string: $val)));
             $barr = explode(separator: " ", string: preg_replace(pattern: '/\((.*)\)/', replacement: '', subject: trim(string: $val)));
 
-            $el[$key] = [];
+            $el[ $key ] = [];
 
             if($key === 0)
             {
-                $el[$key]['generic'] = $varr[0];
-                $el[$key]['htmlver'] = $varr[1] ?? null;
+                $el[ $key ]['generic'] = $varr[0];
+                $el[ $key ]['htmlver'] = $varr[1] ?? null;
             }
 
             if($key === 1)
@@ -337,11 +337,11 @@ function userAgent(): void
                 foreach($parr as $k => $v)
                 {
                     if($k == 0)
-                        $el[$key]["platform"] = str_replace(search: [ '(', ')' ], replace: '', subject: trim(string: $parr[$k]));
+                        $el[ $key ]["platform"] = str_replace(search: [ '(', ')' ], replace: '', subject: trim(string: $parr[ $k ]));
                     if($k == 1)
-                        $el[$key]["version"] = str_replace(search: [ '(', ')' ], replace: '', subject: trim(string: $parr[$k]));
+                        $el[ $key ]["version"] = str_replace(search: [ '(', ')' ], replace: '', subject: trim(string: $parr[ $k ]));
                     if($k >= 2)
-                        $el[$key]["val$k"] = str_replace(search: [ '(', ')' ], replace: '', subject: trim(string: $parr[$k]));
+                        $el[ $key ][ "val$k" ] = str_replace(search: [ '(', ')' ], replace: '', subject: trim(string: $parr[ $k ]));
                 }
             }
 
@@ -354,9 +354,9 @@ function userAgent(): void
                     $jj = explode("/", preg_replace('/\((.*)\)/', '', trim($j)));
                     if(!empty(trim($jj[0])))
                     {
-                        $el[$key + $n]['product'] = $jj[0];
-                        $bl[$n] = $jj[0];
-                        $el[$key + $n]['version'] = !empty($jj[1]) ? $jj[1] : null;
+                        $el[ $key + $n ]['product'] = $jj[0];
+                        $bl[ $n ] = $jj[0];
+                        $el[ $key + $n ]['version'] = !empty($jj[1]) ? $jj[1] : null;
                         $n++;
                     }
                 }
@@ -565,15 +565,41 @@ function load_locale()
     return;
 }
 
-/** returns true if JSON is valid or a errorcode if not.
- * json_last_error: It returns an error constant, such as JSON_ERROR_NONE (no error) or others like JSON_ERROR_SYNTAX (invalid JSON).
+// /** 
+//  * @param string $json 
+//  * @return bool ex. JSON_ERROR_NONE, JSON_ERROR_SYNTAX  etc ...
+//  * 
+
+
+
+
+
+
+
+
+
+/**   
+ * if $verbose is not set ot false - it returns "true" or "false"  
+ * if $verbose is true - it returns an error constant, such as JSON_ERROR_NONE (no error) or others like JSON_ERROR_SYNTAX (invalid JSON).  
+ * https://www.php.net/manual/function.json-decode.php
  * @param string $json 
- * @return bool ex. JSON_ERROR_NONE, JSON_ERROR_SYNTAX  etc ...
+ * @param null|bool $associative true, false, null
+ * @param int $depth 512
+ * @param int $flags 0
+ * @param bool|null $verbose true, false, null 
+ * @return bool|int
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
-function is_json(string $json): bool
+function is_json(string $json, bool|null $associative = null, int $depth = 512, int $flags = 0, bool|null $verbose = null): bool|int
 {
-    json_decode(json: $json);
-    return json_last_error() === JSON_ERROR_NONE;
+    json_decode(json: $json, associative: $associative, depth: $depth, flags: $flags);
+    if(empty($verbose))
+    {
+        return json_last_error() === JSON_ERROR_NONE;
+    }
+    else
+    {
+        return json_last_error();
+    }
 }
