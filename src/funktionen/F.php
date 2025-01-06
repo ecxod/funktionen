@@ -609,12 +609,12 @@ function is_json(string $json, bool|null $associative = null, int $depth = 512, 
 
 
 /**
- * in_array recursive (weil es noch keine gibt)
- * 
  * @param mixed $needle 
  * @param array $haystack 
  * @param bool $strict 
  * @return bool 
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
  */
 function in_array_recursive(mixed $needle, array $haystack, bool $strict = false): bool
 {
@@ -622,11 +622,42 @@ function in_array_recursive(mixed $needle, array $haystack, bool $strict = false
     {
         if(
             ($strict ? $element === $needle : $element == $needle) ||
-            (is_array(value: $element) && in_array_recursive($needle, haystack: $element, strict:$strict))
+            (is_array(value: $element) && in_array_recursive($needle, haystack: $element, strict: $strict))
         )
         {
             return true;
         }
+    }
+    return false;
+}
+
+
+/**
+ * @param mixed $needle 
+ * @param array $haystack 
+ * @param bool $strict 
+ * @param bool $recursive 
+ * @param int $depth 
+ * @return bool 
+ * @author Christian Eichert <c@zp1.net>
+ * @version 1.0.0
+ */
+function in_array(
+    mixed $needle,
+    array $haystack,
+    bool $strict = false,
+    bool $recursive = false,
+    int $depth = -1
+): bool {
+    if($depth === 0)
+        return false;
+    foreach($haystack as $element)
+    {
+        if(($strict ? $element === $needle : $element == $needle))
+            return true;
+        if($recursive && is_array(value: $element))
+            if(in_array(needle: $needle, haystack: $element, strict: $strict, recursive: $recursive, depth: $depth - 1))
+                return true;
     }
     return false;
 }
