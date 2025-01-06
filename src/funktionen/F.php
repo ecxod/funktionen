@@ -578,6 +578,8 @@ function load_locale()
 
 
 
+
+
 /**   
  * if $verbose is not set ot false - it returns "true" or "false"  
  * if $verbose is true - it returns an error constant, such as JSON_ERROR_NONE (no error) or others like JSON_ERROR_SYNTAX (invalid JSON).  
@@ -602,4 +604,29 @@ function is_json(string $json, bool|null $associative = null, int $depth = 512, 
     {
         return json_last_error();
     }
+}
+
+
+
+/**
+ * in_array recursive (weil es noch keine gibt)
+ * 
+ * @param mixed $needle 
+ * @param array $haystack 
+ * @param bool $strict 
+ * @return bool 
+ */
+function in_array_recursive(mixed $needle, array $haystack, bool $strict = false): bool
+{
+    foreach($haystack as $element)
+    {
+        if(
+            ($strict ? $element === $needle : $element == $needle) ||
+            (is_array(value: $element) && in_array_recursive($needle, haystack: $element, strict:$strict))
+        )
+        {
+            return true;
+        }
+    }
+    return false;
 }
