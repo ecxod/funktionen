@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecxod\Funktionen;
 
-use \Dotenv\Dotenv;
-use function \realpath;
+use Erusev\Parsedown;
+use Dotenv\Dotenv;
 
 /**
  * @param string $string 
@@ -16,7 +16,7 @@ use function \realpath;
 function c(string $string): string
 {
     //return preg_replace('/[^A-Za-z0-9\-_\.\;\& ]/', '', $string);
-    $Parsedown = new \Parsedown();
+    $Parsedown = new Parsedown();
     $string = htmlspecialchars($string, $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, $encoding = 'UTF-8', $double_encode = false);
     $string = $Parsedown->line($string);
     return $string;
@@ -661,3 +661,152 @@ function in_array(
     }
     return false;
 }
+
+
+
+
+function cleanString($text)
+{
+    $utf8 = array(
+        '/[áàâãª]/u'   =>   'a',
+        '/[ÁÀÂÃ]/u'    =>   'A',
+        '/[ÍÌÎÏ]/u'    =>   'I',
+        '/[íìîï]/u'    =>   'i',
+        '/[éèêë]/u'    =>   'e',
+        '/[ÉÈÊË]/u'    =>   'E',
+        '/[óòôõº]/u'   =>   'o',
+        '/[ÓÒÔÕ]/u'    =>   'O',
+        '/[úùû]/u'     =>   'u',
+        '/[ÚÙÛ]/u'     =>   'U',
+        '/ç/'          =>   'c',
+        '/Ç/'          =>   'C',
+        '/ñ/'          =>   'n',
+        '/Ñ/'          =>   'N',
+        '/–/'          =>   '-', // UTF-8 hyphen to "normal" hyphen
+        '/[’‘‹›‚]/u'   =>   ' ', // Literally a single quote
+        '/[“”«»„]/u'   =>   ' ', // Double quote
+        '/ /'          =>   ' ', // nonbreaking space (equiv. to 0x160)
+    );
+    return preg_replace(array_keys($utf8), array_values($utf8), $text);
+}
+
+
+
+/**
+ * Sends a message to Sentry
+ * 
+ * @param string $message
+ * @param string $level [warning, error, fatal]
+ * @return void
+ */
+function captureMessage(string $message = null, string $level = "warning"): void
+{
+    $level_arr = [ "warning", "error", "fatal" ];
+    if(
+        in_array($level, $level_arr) and
+        method_exists(object_or_class: "\\Sentry\\Sentry", method: "captureMessage") and
+        method_exists(object_or_class: "\\Sentry\\Sentry", method: "withScope")
+    )
+    {
+        \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($message, $level): void
+        {
+            if($level == "error")
+                $scope->setLevel(\Sentry\Severity::error());
+            if($level == "warning")
+                $scope->setLevel(\Sentry\Severity::warning());
+            if($level == "fatal")
+                $scope->setLevel(\Sentry\Severity::fatal());
+
+            if(isset($message))
+            {
+                // Use the $message variable instead of hardcoded string
+                \Sentry\captureMessage($message);
+            }
+        });
+    }
+}
+
+/**
+ * Log something to the log location or send to sentry
+ * 
+ * @param string|null $logfile 
+ * @param string|null $logstring 
+ * 
+ * @return void 
+ */
+function log(string $logfile = null, string $logstring, string $sentryLevel = "warning"): void
+{
+    $level_arr = [ "warning", "error", "fatal" ];
+    if(in_array(needle: $sentryLevel, haystack: $level_arr) == false)
+    {
+        $sentryLevel = "warning";
+    }
+
+
+    if(!empty($logfile))
+    {
+        // Wenn kein Pfad existiert erstellen wir ihn
+        if(!empty($logfile) and !is_file(filename: $logfile))
+        {
+            touch(filename: $logfile);
+        }
+
+        // da wir jetzt ein logPath haben , nutzen wir ihn
+        try
+        {
+
+            $realLogpath = realpath(path: $logfile);
+            if($realLogpath)
+            {
+                error_log(message: $logstring, message_type: 3, destination: $realLogpath);
+            }
+            else
+            {
+                error_log(message: $logstring);
+            }
+        }
+        catch (Exception $e)
+        {
+
+            // \Sentry\withScope( function (\Sentry\State\Scope $scope, string $realLogpath,string  $e): void 
+            // {
+            //     $scope->setLevel(\Sentry\Severity::warning());
+            //     \Sentry\captureMessage(
+            //         message: "Can not create $realLogpath. The location is not writeable. $e " . __NAMESPACE__ . ":::" . __METHOD__ . ":" . __LINE__
+            //     );
+            // }, $realLogpath, $e);
+
+            self::captureMessage(message: "Can not create $realLogpath. The location is not writeable. $e " . __NAMESPACE__ . ":::" . __METHOD__ . ":" . __LINE__, level: $sentryLevel);
+        }
+    }
+    else
+    {
+
+        // \Sentry\withScope( function (\Sentry\State\Scope $scope,string $logstring): void {
+        //     $scope->setLevel(\Sentry\Severity::warning());
+        //     \Sentry\captureMessage(
+        //         message: $logstring ." ::::". __NAMESPACE__ . ":::" . __METHOD__ . ":" . __LINE__
+        //     );
+        // });
+        self::captureMessage(message: $logstring . " ::::" . __NAMESPACE__ . ":::" . __METHOD__ . ":" . __LINE__, level: $sentryLevel);
+        error_log(message: $logstring);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
