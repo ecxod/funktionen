@@ -776,7 +776,7 @@ function log(string $logfile = null, string $logstring, string $sentryLevel = "w
             //     );
             // }, $realLogpath, $e);
 
-            self::captureMessage(message: "Can not create $realLogpath. The location is not writeable. $e " . __NAMESPACE__ . ":::" . __METHOD__ . ":" . __LINE__, level: $sentryLevel);
+            captureMessage(message: "Can not create $realLogpath. The location is not writeable. $e " . __NAMESPACE__ . ":::" . __METHOD__ . ":" . __LINE__, level: $sentryLevel);
         }
     }
     else
@@ -788,7 +788,7 @@ function log(string $logfile = null, string $logstring, string $sentryLevel = "w
         //         message: $logstring ." ::::". __NAMESPACE__ . ":::" . __METHOD__ . ":" . __LINE__
         //     );
         // });
-        self::captureMessage(message: $logstring . " ::::" . __NAMESPACE__ . ":::" . __METHOD__ . ":" . __LINE__, level: $sentryLevel);
+        captureMessage(message: $logstring . " ::::" . __NAMESPACE__ . ":::" . __METHOD__ . ":" . __LINE__, level: $sentryLevel);
         error_log(message: $logstring);
     }
 }
