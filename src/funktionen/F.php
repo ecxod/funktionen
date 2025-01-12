@@ -889,9 +889,9 @@ function v(array $get_defined_vars = null, array $func_get_args = null, string $
     }
 
     if(
-        (!empty($_ENV['DEBUGOPT']) or 
-        (class_exists(class: "Ecxod\\Funktionen\\K") and 
-        defined(constant_name: "K::DEBUGLOG"))) and
+        (!empty($_ENV['DEBUGOPT']) or
+            (class_exists(class: "Ecxod\\Funktionen\\K") and
+                defined(constant_name: "K::DEBUGLOG"))) and
         explode(separator: ':', string: $m)[0] !== 'D' and
         explode(separator: ':', string: $m)[0] !== 'MENUE' and
         isMe()
