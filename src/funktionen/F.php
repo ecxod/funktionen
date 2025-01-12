@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Ecxod\Funktionen;
 
 use Erusev\Parsedown;
-use Dotenv\Dotenv;
+use \Dotenv\Dotenv;
+use function \realpath;
 
 /**
  * @param string $string 
@@ -47,7 +48,7 @@ function logg(string|array $t, string $m = null, int $l = null): bool
     }
     elseif(gettype($t) === 'string')
     {
-        if($_ENV['ERRORLOG'])
+        if(!empty($_ENV['ERRORLOG']) and is_writeable($_ENV['ERRORLOG']))
         {
             error_log(
                 (strval($t) ? strval($t) : 'ERROR') .
@@ -584,6 +585,7 @@ function load_locale()
  * if $verbose is not set ot false - it returns "true" or "false"  
  * if $verbose is true - it returns an error constant, such as JSON_ERROR_NONE (no error) or others like JSON_ERROR_SYNTAX (invalid JSON).  
  * https://www.php.net/manual/function.json-decode.php
+ * //TODO: etwas ist da faul
  * @param string $json 
  * @param null|bool $associative true, false, null
  * @param int $depth 512
@@ -593,7 +595,7 @@ function load_locale()
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
-function is_json(string $json, bool|null $associative = null, int $depth = 512, int $flags = 0, bool|null $verbose = null): bool|int
+function is_json(string $json, bool|null $associative = null, int $depth = 512, int $flags = 0, bool|null $verbose = true): bool|int|string
 {
     json_decode(json: $json, associative: $associative, depth: $depth, flags: $flags);
     if(empty($verbose))
@@ -602,7 +604,7 @@ function is_json(string $json, bool|null $associative = null, int $depth = 512, 
     }
     else
     {
-        return json_last_error();
+        return json_last_error_msg();
     }
 }
 
@@ -632,7 +634,7 @@ function in_array_recursive(mixed $needle, array $haystack, bool $strict = false
 }
 
 
-/**
+/** //TODO warum ist diese funktion anders ?
  * @param mixed $needle 
  * @param array $haystack 
  * @param bool $strict 
@@ -664,6 +666,7 @@ function in_array(
 
 
 
+// TODO brauch noch jemand das ab hier ?
 
 function cleanString($text)
 {
