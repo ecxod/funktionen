@@ -551,7 +551,7 @@ function load_locale()
         $_SESSION['locale_canonicalize'] = strval(value: \Locale::canonicalize(locale: strval(value: $_SESSION['locale_from_http'])));
         $_SESSION['locale_display_language'] = strval(value: \Locale::getDisplayLanguage(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
         $_SESSION['locale_display_region'] = strval(value: \Locale::getDisplayRegion(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
-        if(class_exists("Ecxod\\Funktionen\\K") and K::DEBUGOPT)
+        if(!empty($_ENV['DEBUGOPT']) and is_writable($_ENV['DEBUGOPT']))
         {
             error_log(
                 "2_HTTP_ACCEPT_LANGUAGE=" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] .
@@ -671,24 +671,24 @@ function in_array(
 function cleanString($text)
 {
     $utf8 = array(
-        '/[áàâãª]/u'   =>   'a',
-        '/[ÁÀÂÃ]/u'    =>   'A',
-        '/[ÍÌÎÏ]/u'    =>   'I',
-        '/[íìîï]/u'    =>   'i',
-        '/[éèêë]/u'    =>   'e',
-        '/[ÉÈÊË]/u'    =>   'E',
-        '/[óòôõº]/u'   =>   'o',
-        '/[ÓÒÔÕ]/u'    =>   'O',
-        '/[úùû]/u'     =>   'u',
-        '/[ÚÙÛ]/u'     =>   'U',
-        '/ç/'          =>   'c',
-        '/Ç/'          =>   'C',
-        '/ñ/'          =>   'n',
-        '/Ñ/'          =>   'N',
-        '/–/'          =>   '-', // UTF-8 hyphen to "normal" hyphen
-        '/[’‘‹›‚]/u'   =>   ' ', // Literally a single quote
-        '/[“”«»„]/u'   =>   ' ', // Double quote
-        '/ /'          =>   ' ', // nonbreaking space (equiv. to 0x160)
+        '/[áàâãª]/u' => 'a',
+        '/[ÁÀÂÃ]/u'  => 'A',
+        '/[ÍÌÎÏ]/u'  => 'I',
+        '/[íìîï]/u'  => 'i',
+        '/[éèêë]/u'  => 'e',
+        '/[ÉÈÊË]/u'  => 'E',
+        '/[óòôõº]/u' => 'o',
+        '/[ÓÒÔÕ]/u'  => 'O',
+        '/[úùû]/u'   => 'u',
+        '/[ÚÙÛ]/u'   => 'U',
+        '/ç/'        => 'c',
+        '/Ç/'        => 'C',
+        '/ñ/'        => 'n',
+        '/Ñ/'        => 'N',
+        '/–/'        => '-', // UTF-8 hyphen to "normal" hyphen
+        '/[’‘‹›‚]/u' => ' ', // Literally a single quote
+        '/[“”«»„]/u' => ' ', // Double quote
+        '/ /'        => ' ', // nonbreaking space (equiv. to 0x160)
     );
     return preg_replace(array_keys($utf8), array_values($utf8), $text);
 }
@@ -796,6 +796,143 @@ function log(string $logfile = null, string $logstring, string $sentryLevel = "w
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** 
+ * returns a list of keys of the method in witch it was called like :
+ * echo F::v(get_defined_vars());
+ * 
+ * // TODO: umziehen in globale F 
+ * 
+ * @param array $get_defined_vars 
+ * @param string $outputformat 
+ * @return array|string 
+ */
+function vv(array $get_defined_vars, array $func_get_args = null, string $method = null, string $outputformat = "string")
+{
+
+    $outputformatArray = [ "string", "array" ];
+    $outputformat = in_array(needle: $outputformat, haystack: $outputformatArray) ? $outputformat : "string";
+
+    $method_keys_array = empty($get_defined_vars) ? [] : array_keys(array: $get_defined_vars);
+    $method_keys_csv = implode(separator: ',', array: $method_keys_array);
+
+    $param_keys_array = empty($func_get_args) ? [] : array_keys(array: $func_get_args);
+    $param_keys_csv = implode(separator: ',', array: $param_keys_array);
+
+    $method_with_keys = $method ? "$method($method_keys_csv) " .
+        (
+            empty($param_keys_csv) ? "" : "SELF($param_keys_csv)"
+        ) :
+        (string) $method_keys_csv . ",(self::)" . $param_keys_csv;
+
+    return $outputformat === "array" ? (array) [ $method_keys_array, $param_keys_array ] : (string) $method_with_keys;
+
+}
+
+function v(array $get_defined_vars = null, array $func_get_args = null, string $m = null)
+{
+
+    $debuglog_aus_const = (class_exists("Ecxod\\Funktionen\\K") and defined("K::DEBUGLOG")) ?
+        strval(value: realpath(path: strval(value: K::DEBUGLOG))) : '';
+    $debuglog_aus_server = empty($_SERVER['error_log']) ? '' : strval(value: realpath(path: strval(value: $_SERVER['error_log'])));
+    $error_message_text = "\n >>> " . strval(value: vv(get_defined_vars: $get_defined_vars, func_get_args: $func_get_args, method: $m, outputformat: "string")) . "\n";
+
+
+    if(!empty($debuglog_aus_const))
+    {
+        $debuglog = $debuglog_aus_const;
+    }
+    elseif(!empty($debuglog_aus_server))
+    {
+        $debuglog = $debuglog_aus_server;
+    }
+    else
+    {
+        $debuglog = null;
+    }
+
+    if(
+        (!empty($_ENV['DEBUGOPT']) or 
+        (class_exists(class: "Ecxod\\Funktionen\\K") and 
+        defined(constant_name: "K::DEBUGLOG"))) and
+        explode(separator: ':', string: $m)[0] !== 'D' and
+        explode(separator: ':', string: $m)[0] !== 'MENUE' and
+        isMe()
+    )
+    {
+        if(
+            !empty($debuglog) and
+            file_exists(filename: $debuglog) and
+            is_writable(filename: $debuglog)
+        )
+        {
+            error_log(message: $error_message_text, message_type: 3, destination: $debuglog);
+        }
+        elseif(
+            !empty($debuglog) and
+            file_exists(filename: $debuglog) and
+            !is_writable(filename: $debuglog)
+        )
+        {
+            try
+            {
+                touch($debuglog);
+            }
+            catch (\Exception $e)
+            {
+                error_log("\n=======================================\n");
+                error_log("\nACHTUNG !!! Kann nicht schreiben in ENV[DEBUGLOG] $debuglog in " . __METHOD__ . ":" . __LINE__);
+                error_log("\n=======================================\n");
+            }
+            error_log(message: $error_message_text);
+        }
+        else
+        {
+            error_log(message: $error_message_text);
+        }
+    }
+    else
+    {
+        return;
+    }
+}
 
 
 
