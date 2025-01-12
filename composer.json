@@ -32,6 +32,7 @@
         "exclude": [
             ".github",
             ".vscode",
+            "src/funktionen/K.php",
             "tests",
             "vendor"
         ]
