@@ -4,22 +4,31 @@ declare(strict_types=1);
 
 namespace Ecxod\Funktionen;
 
-use Erusev\Parsedown;
+use \Erusev\Parsedown;
 use \Dotenv\Dotenv;
 use function \realpath;
 
-/**
+/** 
+ * 1) Markdown is parsed into HTML.
+ * 2) Any potentially harmful characters in the HTML output (like <, >, &, etc.) are encoded, 
+ * which is especially important if you plan to display user-generated content on the web.
+ * 
  * @param string $string 
  * @return string 
  * @author Christian Eichert <c@zp1.net>
- * @version 1.0.0
+ * @version 1.1.0
  */
 function c(string $string): string
 {
     //return preg_replace('/[^A-Za-z0-9\-_\.\;\& ]/', '', $string);
-    $Parsedown = new Parsedown();
-    $string = htmlspecialchars($string, $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, $encoding = 'UTF-8', $double_encode = false);
+    $Parsedown = new \Parsedown();
     $string = $Parsedown->line($string);
+    $string = htmlspecialchars(
+        $string,
+        flags: $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5,
+        encoding: $encoding = 'UTF-8',
+        double_encode: $double_encode = false
+    );
     return $string;
 }
 
@@ -93,7 +102,7 @@ function write_mail(string $t = null, string $m = null, int $l = null): void
  */
 function error_log_array(array $arr, string $m = null, int $l = null): void
 {
-    logg("array(" . json_encode($arr) . ")", $m, $l);
+    logg("array(" . json_encode(value: $arr) . ")", $m, $l);
     return;
 }
 
@@ -106,6 +115,12 @@ function error_log_array(array $arr, string $m = null, int $l = null): void
  */
 function h(string $m = null, string $f = null, string $l = null, string $t = null): void
 {
+    if (empty($_ENV['DEBUGOPT']))
+        // we do not want to debug
+        return;
+    // checking if display_errors is set
+
+
     if(
         !empty($_ENV['DEBUGOPT']) and
         !empty($_ENV['DEBUGLOG']) and
@@ -118,12 +133,16 @@ function h(string $m = null, string $f = null, string $l = null, string $t = nul
         {
             $kl = explode(separator: '::', string: $m)[0];
             $fu = explode(separator: '::', string: $m)[1];
+
             if(!empty($kl) and !empty($fu) and method_exists(object_or_class: $kl, method: $fu))
                 error_log(message: "\n >>> $m (method)\r", message_type: 3, destination: $_ENV['DEBUGLOG']);
+
             if((empty($kl) or empty($fu) or !method_exists(object_or_class: $kl, method: $fu)) and file_exists(filename: $f))
                 error_log(message: "\n >>> " . basename(path: $f) . " (file) " . $l, message_type: 3, destination: $_ENV['DEBUGLOG']);
+
             if(empty($m) and empty($f) and empty($l) and !empty($t))
                 error_log(message: "\n >>> $t", message_type: 3, destination: $_ENV['DEBUGLOG']);
+
             if(empty($m) and empty($f) and empty($l) and empty($t))
                 return;
         }
@@ -133,7 +152,7 @@ function h(string $m = null, string $f = null, string $l = null, string $t = nul
             {
                 touch(filename: $_ENV['DEBUGLOG']);
             }
-            catch (\Exception $e)
+            catch (\Exception $exception)
             {
                 error_log(message: "\n=======================================\n");
                 error_log(message: "\nACHTUNG !!! Kann nicht schreiben in: " . $_ENV['DEBUGLOG'] . " in " . __METHOD__);
@@ -404,11 +423,11 @@ function sayonara(): void
         {
             session_regenerate_id(true);
         }
-        session_set_cookie_params([
+        session_set_cookie_params([ 
             'lifetime' => 0,
-            'path' => '/',
-            'domain' => $_SERVER['SERVER_NAME'], // Optional: Domain angeben
-            'secure' => true, // Nur über HTTPS übertragen
+            'path'     => '/',
+            'domain'   => $_SERVER['SERVER_NAME'], // Optional: Domain angeben
+            'secure'   => true, // Nur über HTTPS übertragen
             'httponly' => true, // Nicht per JavaScript zugänglich
             'samesite' => 'Strict' // 'None', 'Lax' oder 'Strict'
         ]);
@@ -437,12 +456,12 @@ function languageManagement(): void
         $locale_from_http = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
         $_SESSION['locale_canonicalize'] = strval(\Locale::canonicalize($locale_from_http));
         $_SESSION['locale_display_language'] = strval(locale_get_display_language(
-            $locale_from_http,
-            isset($_COOKIE['la']) ? $_COOKIE['la'] : 'en'
+            locale: $locale_from_http,
+            displayLocale: $_COOKIE['la'] ?? 'en'
         ));
         $_SESSION['locale_display_region'] = strval(locale_get_display_region(
-            $locale_from_http,
-            isset($_COOKIE['la']) ? $_COOKIE['la'] : 'en'
+            locale: $locale_from_http,
+            displayLocale: $_COOKIE['la'] ?? 'en'
         ));
     }
 }
