@@ -4,6 +4,5 @@
 /docs export-ignore
 .github export-ignore
 .vscode ecxopt-ignore
-tests export-ignore
 docs export-ignore
 src/funktionen/K.php export-ignore
