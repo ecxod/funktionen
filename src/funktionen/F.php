@@ -404,6 +404,14 @@ function sayonara(): void
         {
             session_regenerate_id(true);
         }
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => $_SERVER['SERVER_NAME'], // Optional: Domain angeben
+            'secure' => true, // Nur über HTTPS übertragen
+            'httponly' => true, // Nicht per JavaScript zugänglich
+            'samesite' => 'Strict' // 'None', 'Lax' oder 'Strict'
+        ]);
         session_start();
     }
 }
