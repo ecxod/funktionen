@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Ecxod\I18n;
 
-
+/** @package Ecxod\I18n */
 class L
 {
 
