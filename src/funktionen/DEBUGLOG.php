@@ -16,64 +16,74 @@ class DEBUGLOG
      */
     public function __construct()
     {
-        $this->setPhpIniErrorLog(ini_get(option: 'error_log'));
+        $this->setEnvDebugOpt( env_debug_opt: $_ENV['DEBUGOPT'] ?? getenv(name: 'DEBUGOPT') ?? false);
+        $this->setEnvDebugLog( env_debug_log: $_ENV['DEBUGLOG'] ?? getenv(name: 'DEBUGLOG') ?? "" );
+        $this->setServerErrorLog(server_error_log: $_SERVER['ERROR_LOG'] ?? getenv(name: 'ERROR_LOG') ?? "");
+        $this->setPhpIniErrorLog(php_get_ini_error_log: ini_get(option: 'error_log'));
 
 
     }
 
-    protected function machen()
+    protected function id0100_function()
     {
         if(
-            // id0100
-            $this->check_env_debugopt() === true
+            $this->getEnvDebugOpt() === true
         )
         {
-
-            // id0200
-            $this->set_inis();
-
-            // id0300
-            if( $this->getPhpIniErrorLog() and $this->getPhpIniErrorLog() !== "syslog" )
-            {
-                // id0400
-
-                if( 
-                    // id0500
-                    $this->check_env_debugLog() === true
-                )
-                {
-                    $_ENV['DEBUGLOG'] = ini_get(option: 'error_log');
-                    $this->setEnvDebugOpt(env_debug_opt: $_ENV['DEBUGOPT']);
-                }else{
-
-                    // id0600
-                    $this->check_server_error_log();
-
-                }
-
-            }
-            else
-            {
-                // id0310
-                if($this->check_error_log_exists_writable())
-                {
-                    // id0990
-
-                }else{
-                    // id0600
-                }
-            }
-
-
-            return true;
-
+            // if true
+            $this->id0200_set_inis();
+        }
+        elseif($this->getEnvDebugOpt() === false)
+        {
+            // if false 
+            return false;
         }
         else
         {
-            // id0210 + id0220
-            return false;
+            // if empty
+            die("Please set DEBUGOPT.");
         }
     }
+
+    protected function id0200_set_inis(): void
+    {
+        ini_set(option: 'display_errors', value: '0');
+        ini_set(option: 'display_starup_errors', value: '1');
+        ini_set(option: 'log_errors', value: '1');
+        $this->id0300_function();
+        return;
+    }
+
+    protected function id0300_function()
+    {
+        if(
+            // empty or not empty or syslog
+            $this->getEnvDebugLog() === strtolower('syslog') or empty($this->getEnvDebugLog())
+        )
+        {
+            // id0400 
+            $this->id0400_function();
+        }else{
+            // id0310
+            $this->id0310_check_error_log_exists_writable();
+        }
+    }
+
+
+
+    protected function id0400_function()
+    {
+        if(empty($this->getEnvDebugLog())){
+            //id0600
+        }else{
+            //id0500
+        }
+    }
+
+
+
+
+
 
 
     /**
@@ -81,22 +91,13 @@ class DEBUGLOG
      * // id0100
      * @return bool
      */
-    protected function check_env_debugopt(): bool
-    {
-        return (isset($_ENV['DEBUGOPT']) && ($_ENV['DEBUGOPT'] === true || $_ENV['DEBUGOPT'] === 'true')) ||
-            (getenv(name: 'DEBUGOPT') === 'true');
-    }
+    // protected function id0100_check_env_debugopt(): bool
+    // {
+    //     return (isset($_ENV['DEBUGOPT']) && ($_ENV['DEBUGOPT'] === true || $_ENV['DEBUGOPT'] === 'true')) ||
+    //         (getenv(name: 'DEBUGOPT') === 'true');
+    // }
 
-    /**
-     * Prüfen, ob DEBUGLOG vorhanden ist und ein String ist.
-     * // id0400
-     * @return bool
-     */
-    protected function check_env_debugLog(): bool
-    {
-        return (isset($_ENV['DEBUGLOG']) && is_string($_ENV['DEBUGLOG'])) ||
-            (getenv(name: 'DEBUGLOG') !== false && is_string(value: getenv('DEBUGLOG')));
-    }
+
 
     /**
      * Prüfen, ob ERROR_LOG vorhanden ist und ein String ist.
@@ -112,10 +113,10 @@ class DEBUGLOG
      * 
      * @return bool 
      */
-    protected function check_error_log_exists_writable(): bool
+    protected function id0310_check_error_log_exists_writable(): bool
     {
         // id0310
-        return file_exists(filename: $this->getPhpIniErrorLog()) && 
+        return file_exists(filename: $this->getPhpIniErrorLog()) &&
             is_writable(filename: $this->getPhpIniErrorLog());
 
     }
@@ -139,13 +140,7 @@ class DEBUGLOG
 
 
 
-    protected function set_inis(): void
-    {
-        ini_set(option: 'display_errors', value: '0');
-        ini_set(option: 'display_starup_errors', value: '1');
-        ini_set(option: 'log_errors', value: '1');
-        return;
-    }
+
 
 
 
