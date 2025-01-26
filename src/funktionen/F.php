@@ -60,7 +60,7 @@ function logg(string|array $t, string $m = null, int $l = null): bool
         if(!empty($_ENV['ERRORLOG']) and is_writeable($_ENV['ERRORLOG']))
         {
             error_log(
-                (strval($t) ? strval($t) : 'ERROR') .
+                (strval($t) ?: 'ERROR') .
                 (strval($m) ? " in " . strval($m) : "") .
                 (strval($l) ? " #" . strval($l) : "")
             );
