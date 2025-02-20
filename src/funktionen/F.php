@@ -611,7 +611,9 @@ function in_array_recursive(mixed $needle, array $haystack, bool $strict = false
 }
 
 
-/** //TODO warum ist diese funktion anders ?
+/** 
+ * - recusive verion von "Mutters" in_array
+ * - depth gibt die Tiefe an 
  * @param mixed $needle 
  * @param array $haystack 
  * @param bool $strict 
