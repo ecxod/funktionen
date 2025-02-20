@@ -196,7 +196,7 @@ function mob_str(): string
 function isMe(): bool
 {
     $myIp = "";
-    $BESUCHER = prodyDetection() ? strval(value: $_SERVER['HTTP_X_FORWARDED_FOR']) : strval(value: $_SERVER['REMOTE_ADDR']);
+    $BESUCHER = proxyDetection() ? strval(value: $_SERVER['HTTP_X_FORWARDED_FOR']) : strval(value: $_SERVER['REMOTE_ADDR']);
 
     if (empty($myIp))
         $myIp = strval(value: $_ENV['MYIP']);
@@ -220,7 +220,7 @@ function isMe(): bool
 /** Detct if we are behind a proxy 
  * @return bool
  */
-function prodyDetection(): bool
+function proxyDetection(): bool
 {
     // Check for common proxy headers
     $proxyHeaders = [
