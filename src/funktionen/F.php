@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Ecxod\Funktionen;
 
-use \Erusev\Parsedown;
-use \Dotenv\Dotenv;
+use Erusev\Parsedown;
+use Dotenv\Dotenv;
+use Throwable;
 use function \realpath;
 
 /** 
@@ -735,7 +736,7 @@ function log(string $logfile = null, string $logstring, string $sentryLevel = "w
             } else {
                 error_log(message: $logstring);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
 
             // \Sentry\withScope( function (\Sentry\State\Scope $scope, string $realLogpath,string  $e): void 
             // {
