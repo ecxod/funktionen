@@ -6,8 +6,13 @@ namespace Ecxod\Funktionen;
 
 use Erusev\Parsedown;
 use Dotenv\Dotenv;
+use Locale;
 use Throwable;
-use function \realpath;
+use function getenv;
+use function is_array;
+use function locale_get_display_region;
+use function realpath;
+use function strval;
 
 /** 
  * 1) Markdown is parsed into HTML.
@@ -429,8 +434,8 @@ function languageManagement(): void
     if (empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
         $locale_from_http = "en_US";
     } else {
-        $locale_from_http = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-        $_SESSION['locale_canonicalize'] = strval(\Locale::canonicalize($locale_from_http));
+        $locale_from_http = \locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        $_SESSION['locale_canonicalize'] = \strval(Locale::canonicalize($locale_from_http));
         $_SESSION['locale_display_language'] = strval(locale_get_display_language(
             locale: $locale_from_http,
             displayLocale: $_COOKIE['la'] ?? 'en'
@@ -531,10 +536,10 @@ function load_locale()
     $_SESSION["lang"] = isset($_COOKIE['lang']) ? strval($_COOKIE['lang']) : 'de'; // wird vom User im Dropdown gesetzt
     $_SESSION['locale_from_http'] ?? "de_DE";
     if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-        $_SESSION['locale_from_http'] = strval(value: \Locale::acceptFromHttp(header: strval(value: $_SERVER['HTTP_ACCEPT_LANGUAGE'])));
-        $_SESSION['locale_canonicalize'] = strval(value: \Locale::canonicalize(locale: strval(value: $_SESSION['locale_from_http'])));
-        $_SESSION['locale_display_language'] = strval(value: \Locale::getDisplayLanguage(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
-        $_SESSION['locale_display_region'] = strval(value: \Locale::getDisplayRegion(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
+        $_SESSION['locale_from_http'] = strval(value: Locale::acceptFromHttp(header: strval(value: $_SERVER['HTTP_ACCEPT_LANGUAGE'])));
+        $_SESSION['locale_canonicalize'] = strval(value: Locale::canonicalize(locale: strval(value: $_SESSION['locale_from_http'])));
+        $_SESSION['locale_display_language'] = \strval(value: Locale::getDisplayLanguage(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
+        $_SESSION['locale_display_region'] = strval(value: Locale::getDisplayRegion(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
         if (!empty($_ENV['DEBUGOPT']) and is_writable($_ENV['DEBUGOPT'])) {
             error_log(
                 "2_HTTP_ACCEPT_LANGUAGE=" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] .
@@ -881,3 +886,31 @@ function v(array $get_defined_vars = null, array $func_get_args = null, string $
         return;
     }
 }
+
+
+
+    /** Get the Composer Vendor Path
+     * @return string
+     * // TODO: sollte irgendwann in ein ecxod/composer umziehen 
+     */
+    function getVendorpath(): string
+    {
+        $vendorpath = "";
+        if(empty($_SERVER["DOCUMENT_ROOT"]))
+            die("Please set DOCUMENT_ROOT.");
+
+        if(empty($_ENV["VENDOR"]))
+            die("Please set \$_ENV['VENDOR'] to something like '" . $_SERVER["DOCUMENT_ROOT"] . "/../vendor/" . "' inside your Document Root.");
+
+        $envVendorPath = \strval(\realpath($_ENV['VENDOR']));
+
+        if(empty($envVendorPath))
+        {
+            die("Unable to find Composer Vendor Path! - ERR[H00500]");
+        }
+        else
+        {
+            $vendorpath = $envVendorPath;
+            return $vendorpath;
+        }
+    }
