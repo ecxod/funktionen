@@ -21,6 +21,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": "^7.2|^7.4|^8.0|^8.2",
+        "ecxod/lang": "^1.0",
         "sentry/sentry": "^4.8",
         "vlucas/phpdotenv": "^5.6",
         "erusev/parsedown": "^1.7"
