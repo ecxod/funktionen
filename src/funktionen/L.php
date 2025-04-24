@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ecxod\I18n;
 
+use Ecxod\Lang\ISO6391;
+use Locale;
+
 /** @package Ecxod\I18n */
 class L
 {
@@ -271,7 +274,7 @@ class L
                 $_SESSION['browserLang'] = $l[2];
             }
         }
-        $_SESSION['browserLang'] = \Locale::getDisplayName(locale: $current_lang, displayLocale: 'en');
+        $_SESSION['browserLang'] = Locale::getDisplayName(locale: $current_lang, displayLocale: 'en');
 
 
         // die gefundene Sprache zurückgeben
