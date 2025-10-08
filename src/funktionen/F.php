@@ -8,6 +8,7 @@ use Erusev\Parsedown;
 use Dotenv\Dotenv;
 use Locale;
 use Throwable;
+use function error_log;
 use function getenv;
 use function is_array;
 use function locale_get_display_region;
@@ -164,7 +165,7 @@ function h(string $m = null, string $f = null, string $l = null, string $t = nul
  * @author Christian Eichert <c@zp1.net>
  * @version 1.0.0
  */
-function m(string $m): string
+function m(string|int $m)
 {
     return isMe() ? PHP_EOL . '<!--' . strval($m) . '-->' . PHP_EOL : '';
 }
@@ -536,10 +537,10 @@ function load_locale()
     $_SESSION["lang"] = isset($_COOKIE['lang']) ? strval($_COOKIE['lang']) : 'de'; // wird vom User im Dropdown gesetzt
     $_SESSION['locale_from_http'] ?? "de_DE";
     if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-        $_SESSION['locale_from_http'] = strval(value: Locale::acceptFromHttp(header: strval(value: $_SERVER['HTTP_ACCEPT_LANGUAGE'])));
-        $_SESSION['locale_canonicalize'] = strval(value: Locale::canonicalize(locale: strval(value: $_SESSION['locale_from_http'])));
+        $_SESSION['locale_from_http'] = \strval(value: Locale::acceptFromHttp(header: \strval(value: $_SERVER['HTTP_ACCEPT_LANGUAGE'])));
+        $_SESSION['locale_canonicalize'] = \strval(value: Locale::canonicalize(locale: \strval(value: $_SESSION['locale_from_http'])));
         $_SESSION['locale_display_language'] = \strval(value: Locale::getDisplayLanguage(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
-        $_SESSION['locale_display_region'] = strval(value: Locale::getDisplayRegion(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
+        $_SESSION['locale_display_region'] = \strval(value: Locale::getDisplayRegion(locale: $_SESSION['locale_from_http'], displayLocale: $_SESSION["lang"]));
         if (!empty($_ENV['DEBUGOPT']) and is_writable($_ENV['DEBUGOPT'])) {
             error_log(
                 "2_HTTP_ACCEPT_LANGUAGE=" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] .
