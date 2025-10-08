@@ -9,6 +9,7 @@ use Dotenv\Dotenv;
 use Locale;
 use Throwable;
 use function error_log;
+use function function_exists;
 use function getenv;
 use function is_array;
 use function locale_get_display_region;
@@ -158,16 +159,24 @@ function h(string $m = null, string $f = null, string $l = null, string $t = nul
 
 /** 
  * Fügt (nur mir!) HTML Kommentare in den code ein.
- * Idealerweise ist Argument 1 die Methode. Das erscheint dann als KLASE::METHODE
+ * Idealerweise ist Argument 1 die Methode, kann aber auch LINE als integer sein. 
+ * Das erscheint dann als KLASE::METHODE
  * 
- * @param string $m  
+ * @param string|int $m  
  * @return string 
  * @author Christian Eichert <c@zp1.net>
- * @version 1.0.0
+ * @version 1.0.1
  */
-function m(string|int $m)
+function m(string|int $m = "")
 {
-    return isMe() ? PHP_EOL . '<!--' . strval($m) . '-->' . PHP_EOL : '';
+    $m ??= "";
+    $m = (string) $m;
+    if(function_exists('isMe')){
+        return isMe() ? PHP_EOL . '<!--' . $m . '-->' . PHP_EOL : '';
+    }else{
+        return '';
+    }
+
 }
 
 /**
