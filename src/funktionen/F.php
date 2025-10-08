@@ -169,14 +169,12 @@ function h(string $m = null, string $f = null, string $l = null, string $t = nul
  */
 function m(string|int $m = "")
 {
-    $m ??= "";
     $m = (string) $m;
-    if(function_exists('isMe')){
+    if(function_exists(__NAMESPACE__ . '\\isMe')){
         return isMe() ? PHP_EOL . '<!--' . $m . '-->' . PHP_EOL : '';
     }else{
         return '';
     }
-
 }
 
 /**
